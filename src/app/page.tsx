@@ -1,69 +1,80 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import ImageUploader from "@/components/ImageUploader";
+import PFPPreview from "@/components/PFPPreview";
+import BuilderPreview from "@/components/BuilderPreview";
 
 export default function Home() {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [file, setFile] = useState<File | null>(null);
+  const [activeFormat, setActiveFormat] = useState<"A" | "B">("A");
+
+  const handleImageReady = (url: string, uploadedFile: File) => {
+    setImageUrl(url);
+    setFile(uploadedFile);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="flex min-h-screen flex-col items-center p-6 md:p-12 bg-background text-on-surface">
+      <div className="w-full max-w-4xl flex flex-col gap-12 mt-8">
+        
+        {/* Header */}
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <img src="/branding/logo.png" alt="HH Goa" className="w-16 h-16 brutal-border object-contain bg-white" />
+            <div>
+              <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary tracking-tighter uppercase leading-none">
+                HH GOA 2026
+              </h1>
+              <p className="font-mono text-secondary uppercase font-bold mt-1 text-sm tracking-widest">
+                Identity Generator
+              </p>
+            </div>
+          </div>
+          <div className="px-4 py-2 bg-tertiary text-black brutal-border brutal-shadow-pink font-sans font-bold uppercase text-sm">
+            Phase 3: Upload Engine
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Upload Section */}
+        <div className="w-full max-w-2xl mx-auto flex flex-col gap-8">
+          <div className="text-center space-y-4">
+            <h2 className="font-serif text-3xl font-bold text-primary">Create Your Event Identity</h2>
+            <p className="font-sans text-lg opacity-90 text-on-surface">Upload your photo to start. Supported formats: JPG, PNG, HEIC.</p>
+          </div>
+
+          <div className="w-full">
+            <ImageUploader onImageReady={handleImageReady} currentImageUrl={imageUrl} />
+          </div>
+
+          {/* Generated Previews */}
+          {imageUrl && (
+            <div className="w-full mt-8 flex flex-col items-center gap-6">
+              <div className="w-full flex items-center justify-center gap-4 border-b-4 border-black pb-4">
+                <button 
+                  onClick={() => setActiveFormat("A")}
+                  className={`px-6 py-2 font-sans font-bold uppercase brutal-border transition-transform ${activeFormat === "A" ? "bg-primary text-black brutal-shadow-pink hover:-translate-y-1" : "bg-surface text-on-surface hover:bg-[#1a854d]"}`}
+                >
+                  Format A: PFP
+                </button>
+                <button 
+                  onClick={() => setActiveFormat("B")}
+                  className={`px-6 py-2 font-sans font-bold uppercase brutal-border transition-transform ${activeFormat === "B" ? "bg-primary text-black brutal-shadow-pink hover:-translate-y-1" : "bg-surface text-on-surface hover:bg-[#1a854d]"}`}
+                >
+                  Format B: Builder ID
+                </button>
+              </div>
+              
+              {activeFormat === "A" ? (
+                <PFPPreview imageUrl={imageUrl} />
+              ) : (
+                <BuilderPreview imageUrl={imageUrl} />
+              )}
+            </div>
+          )}
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   );
 }

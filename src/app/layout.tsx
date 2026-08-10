@@ -19,8 +19,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "HH Goa 2026 - Identity Generator",
-  description: "Create your HH Goa 2026 Digital Identity",
+  title: "HH GOA 2026 - Identity Generator",
+  description: "Create your Coastal Cyber-Brutalism identity card for Hacker House Goa 2026.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

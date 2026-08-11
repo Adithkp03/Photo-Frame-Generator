@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { renderBoardingPass, BoardingPassConfig } from "../lib/templates/boarding-pass";
+import { renderBoardingPass } from "../lib/templates/boarding-pass";
+import { BoardingPassConfig } from "../lib/types";
 import { Loader2, Download, Share2, RotateCcw } from "lucide-react";
 
 interface Props {
@@ -48,10 +49,9 @@ export default function BoardingPassPreview({
           const newBlob = await renderBoardingPass(
             canvasRef.current,
             imageUrl,
+            "/branding/logo.png",
             name,
             role,
-            title,
-            builderNumber,
             scale,
             panX,
             panY,
@@ -114,7 +114,7 @@ export default function BoardingPassPreview({
       const shareUrl = `${appUrl}/share/${data.id}`;
       
       const text = encodeURIComponent(`Got my HH Goa 2026 boarding pass.\n\n${title}\n#FrameInGoa\n\n`);
-      window.open(`https://x.com/intent/post?text=${text}&url=${encodeURIComponent(shareUrl)}`, "_blank", "noopener,noreferrer");
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(shareUrl)}`, "_blank", "noopener,noreferrer");
     } catch (err) {
       console.error(err);
       setShareError("Share link couldn't be created.");

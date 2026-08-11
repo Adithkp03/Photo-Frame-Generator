@@ -1,49 +1,62 @@
 import React from "react";
-import { PFPStyle, BuilderTemplate } from "@/lib/types";
+import { PFPStyle, BuilderTemplate, BoardingPassStyle, EditorialStyle } from "@/lib/types";
 
 interface StyleSelectorProps {
-  type: "PFP" | "BUILDER";
+  type: "PFP" | "BUILDER" | "PASS" | "EDITORIAL";
   activeStyle: string;
   onSelect: (style: string) => void;
 }
 
-const PFP_STYLES: { id: PFPStyle; title: string; subtitle: string; icon: React.ReactNode }[] = [
+const PFP_STYLES = [
   { id: "CORE", title: "CORE", subtitle: "Official", icon: <div className="w-8 h-8 rounded-full border-4 border-primary bg-background"></div> },
   { id: "SIGNAL", title: "SIGNAL", subtitle: "Technical", icon: <div className="w-8 h-8 rounded-full border-[2px] border-dashed border-white bg-transparent"></div> },
-  { id: "EDITORIAL", title: "EDITORIAL", subtitle: "Poster", icon: <div className="w-8 h-8 bg-surface border-2 border-white flex flex-col justify-end p-1"><div className="w-4 h-1 bg-primary"></div></div> },
+  { id: "SIGNAL_01", title: "SIGNAL 01", subtitle: "Poster", icon: <div className="w-8 h-8 bg-[#002B1A] border-2 border-primary flex items-center justify-center p-1"><div className="w-6 h-6 border border-primary border-dashed rounded-full"></div></div> },
   { id: "WILD", title: "WILD", subtitle: "Experimental", icon: <div className="w-8 h-8 border-4 border-black bg-secondary transform -rotate-12"></div> },
 ];
 
-const BUILDER_TEMPLATES: { id: BuilderTemplate; title: string; subtitle: string; icon: React.ReactNode }[] = [
-  { id: "IDENTITY", title: "IDENTITY", subtitle: "Standard", icon: <div className="w-6 h-8 border-2 border-black bg-primary flex flex-col items-center justify-start p-1"><div className="w-full h-3 bg-black"></div></div> },
-  { id: "PASSPORT", title: "PASSPORT", subtitle: "Ticket", icon: <div className="w-8 h-6 border-2 border-black border-dashed bg-white"></div> },
-  { id: "EDITORIAL", title: "EDITORIAL", subtitle: "Poster", icon: <div className="w-6 h-8 bg-black flex items-end p-1"><div className="w-full h-2 bg-primary"></div></div> },
+const BUILDER_TEMPLATES = [
+  { id: "CREDENTIAL", title: "CREDENTIAL", subtitle: "Official", icon: <div className="w-6 h-8 border-2 border-black bg-primary flex flex-col items-center justify-start p-1"><div className="w-full h-3 bg-black"></div></div> },
+  { id: "PASSPORT", title: "PASSPORT", subtitle: "Travel", icon: <div className="w-8 h-6 border-2 border-black border-dashed bg-white"></div> },
+  { id: "EDITORIAL_ID", title: "EDITORIAL", subtitle: "Poster", icon: <div className="w-6 h-8 bg-black flex items-end p-1"><div className="w-full h-2 bg-primary"></div></div> },
+  { id: "TERMINAL", title: "TERMINAL", subtitle: "Cyberpunk", icon: <div className="w-6 h-8 bg-black border-2 border-green-500"><div className="w-full h-1 bg-green-500 mt-1"></div></div> },
+  { id: "FIELD_PASS", title: "FIELD PASS", subtitle: "Functional", icon: <div className="w-6 h-8 bg-primary"><div className="w-4 h-4 bg-black m-1"></div></div> },
+];
+
+const PASS_STYLES = [
+  { id: "CLASSIC", title: "CLASSIC", subtitle: "Standard", icon: <div className="w-10 h-4 border-2 border-primary border-dashed bg-transparent"></div> },
+  { id: "TERMINAL", title: "TERMINAL", subtitle: "Dark Mode", icon: <div className="w-10 h-4 bg-black border border-green-500"></div> },
+  { id: "AIRLINE", title: "AIRLINE", subtitle: "Flight", icon: <div className="w-10 h-4 bg-green-900 border border-primary"></div> },
+  { id: "DEPARTURE", title: "DEPARTURE", subtitle: "Photo Heavy", icon: <div className="w-10 h-4 bg-white/20"></div> },
+  { id: "EXPRESS", title: "EXPRESS", subtitle: "Hot Pink", icon: <div className="w-10 h-4 bg-secondary"></div> },
 ];
 
 export default function StyleSelector({ type, activeStyle, onSelect }: StyleSelectorProps) {
-  const options = type === "PFP" ? PFP_STYLES : BUILDER_TEMPLATES;
+  let options;
+  if (type === "PFP") options = PFP_STYLES;
+  else if (type === "BUILDER") options = BUILDER_TEMPLATES;
+  else options = PASS_STYLES;
 
   return (
     <div className="flex flex-col gap-3">
       <label className="font-sans font-bold text-sm uppercase text-white/70 tracking-widest">Style</label>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {options.map((opt) => (
           <button
             key={opt.id}
             onClick={() => onSelect(opt.id)}
-            className={`flex flex-col items-center p-4 rounded-2xl text-center transition-all border ${
+            className={`flex flex-col items-center p-3 rounded-xl text-center transition-all border ${
               activeStyle === opt.id 
                 ? "bg-white/10 border-primary shadow-[0_0_15px_rgba(243,231,0,0.3)] scale-100" 
                 : "bg-black/20 border-white/10 hover:bg-white/5 hover:border-white/30 scale-95"
             }`}
           >
-            <div className="h-12 flex items-center justify-center mb-3">
+            <div className="h-10 flex items-center justify-center mb-2">
               {opt.icon}
             </div>
-            <span className={`font-mono text-xs font-bold tracking-wider ${activeStyle === opt.id ? "text-primary" : "text-white/80"}`}>
+            <span className={`font-mono text-[10px] font-bold tracking-wider ${activeStyle === opt.id ? "text-primary" : "text-white/80"}`}>
               {opt.title}
             </span>
-            <span className="font-sans text-[10px] text-white/50 uppercase mt-1">
+            <span className="font-sans text-[8px] text-white/50 uppercase mt-0.5">
               {opt.subtitle}
             </span>
           </button>

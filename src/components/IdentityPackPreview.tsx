@@ -2,10 +2,10 @@ import { useEffect, useRef, useState } from "react";
 import PFPPreview from './PFPPreview';
 import BuilderPreview from './BuilderPreview';
 import BoardingPassPreview from './BoardingPassPreview';
-import { PFPConfig, BuilderConfig } from '../lib/types';
+import { PFPConfig, BuilderConfig, BoardingPassConfig } from '../lib/types';
 import { renderPFP } from '../lib/templates/pfp';
 import { renderBuilderID } from '../lib/templates/builder';
-import { renderBoardingPass, BoardingPassConfig } from '../lib/templates/boarding-pass';
+import { renderBoardingPass } from '../lib/templates/boarding-pass';
 import { Loader2, Share2, Download, RotateCcw } from 'lucide-react';
 
 interface Props {
@@ -61,9 +61,9 @@ export default function IdentityPackPreview(props: Props) {
       if (pfpCanvas.current && builderCanvas.current && passCanvas.current) {
         try {
           const [p, b, pb] = await Promise.all([
-            renderPFP(pfpCanvas.current, props.imageUrl, '/goa-logo.png', props.scale, props.panX, props.panY, props.pfpConfig),
-            renderBuilderID(builderCanvas.current, props.imageUrl, props.name, props.role, props.title, "/branding/logo.png", props.scale, props.panX, props.panY, props.builderConfig),
-            renderBoardingPass(passCanvas.current, props.imageUrl, props.name, props.role, props.title, props.builderNumber, props.scale, props.panX, props.panY, props.passConfig)
+            renderPFP(pfpCanvas.current, props.imageUrl, '/branding/logo.png', props.scale, props.panX, props.panY, props.pfpConfig),
+            renderBuilderID(builderCanvas.current, props.imageUrl, "/branding/logo.png", props.name, props.role, props.title, props.scale, props.panX, props.panY, props.builderConfig),
+            renderBoardingPass(passCanvas.current, props.imageUrl, "/branding/logo.png", props.name, props.role, props.scale, props.panX, props.panY, props.passConfig)
           ]);
           setPfpBlob(p);
           setBuilderBlob(b);
@@ -158,7 +158,7 @@ export default function IdentityPackPreview(props: Props) {
       const shareUrl = `${appUrl}/share/${data.id}`;
       
       const text = encodeURIComponent(`I'm going to Hacker House Goa 2026.\n\nHere is my Identity Pack.\n#FrameInGoa\n\n`);
-      window.open(`https://x.com/intent/post?text=${text}&url=${encodeURIComponent(shareUrl)}`, "_blank", "noopener,noreferrer");
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(shareUrl)}`, "_blank", "noopener,noreferrer");
       
     } catch (e) {
       console.error(e);

@@ -116,7 +116,7 @@ export default function PFPPreview({
       const shareUrl = `${appUrl}/share/${data.id}`;
       
       const text = encodeURIComponent("Just built my HH Goa 2026 identity. #FrameInGoa\n\n");
-      window.open(`https://x.com/intent/post?text=${text}&url=${encodeURIComponent(shareUrl)}`, "_blank", "noopener,noreferrer");
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(shareUrl)}`, "_blank", "noopener,noreferrer");
     } catch (err) {
       console.error(err);
       setShareError("Share link couldn't be created.");

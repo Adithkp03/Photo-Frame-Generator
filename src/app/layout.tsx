@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Libre_Caslon_Text, Hanken_Grotesk, JetBrains_Mono, Bodoni_Moda, Kalam, Space_Mono } from "next/font/google";
+import { Libre_Caslon_Text, Hanken_Grotesk, JetBrains_Mono, Bodoni_Moda, Kalam, Space_Mono, Bebas_Neue, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 
 const libreCaslon = Libre_Caslon_Text({
@@ -35,6 +35,17 @@ const spaceMono = Space_Mono({
   variable: "--font-space",
 });
 
+const bebasNeue = Bebas_Neue({
+  weight: ["400"],
+  subsets: ["latin"],
+  variable: "--font-bebas",
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ["latin"],
+  variable: "--font-space-grotesk",
+});
+
 export const metadata: Metadata = {
   title: "HH GOA 2026 - Identity Generator",
   description: "Create your Coastal Cyber-Brutalism identity card for Hacker House Goa 2026.",
@@ -44,7 +55,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html
       lang="en"
-      className={`${libreCaslon.variable} ${hankenGrotesk.variable} ${jetbrainsMono.variable} ${bodoni.variable} ${kalam.variable} ${spaceMono.variable} h-full antialiased`}
+      className={`${libreCaslon.variable} ${hankenGrotesk.variable} ${jetbrainsMono.variable} ${bodoni.variable} ${kalam.variable} ${spaceMono.variable} ${bebasNeue.variable} ${spaceGrotesk.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans bg-background text-on-surface">{children}</body>
     </html>

@@ -1,13 +1,13 @@
-import { drawImageCover, drawText } from "../image/renderer";
+import { drawImageCover, drawText, drawGrid, drawCropMarks } from "../image/renderer";
 import { loadImage } from "../image/loader";
 import { PFPConfig } from "../types";
 
-const COLOR_MAP = {
-  GREEN: "#006838",
-  YELLOW: "#f3e700",
-  PINK: "#ff007f",
-  BLACK: "#000000",
-  WHITE: "#ffffff",
+const COLOR_MAP: Record<string, string> = {
+  GREEN: "#005C36",
+  YELLOW: "#FFE500",
+  PINK: "#FF0085",
+  BLACK: "#050505",
+  WHITE: "#F5F1E6",
 };
 
 export async function renderPFP(
@@ -24,173 +24,257 @@ export async function renderPFP(
 
   await document.fonts.ready;
 
-  const SIZE = 1080;
-  canvas.width = SIZE;
-  canvas.height = SIZE;
+  const WIDTH = 1080;
+  const HEIGHT = 1080;
+  canvas.width = WIDTH;
+  canvas.height = HEIGHT;
 
-  const BG_COLOR = "#006838"; 
-  const PRIMARY = "#f3e700"; 
-  const SECONDARY = "#ff007f"; 
-  const BORDER = "#000000"; 
-  const WHITE = "#ffffff"; 
+  const sansFont = "'Space Grotesk', sans-serif";
+  const monoFont = "'Space Mono', monospace";
+  const displayFont = "'Bebas Neue', sans-serif";
+
+  const ringColor = COLOR_MAP[config.ringColor] || COLOR_MAP.YELLOW;
   
-  const ringHex = COLOR_MAP[config.ringColor] || PRIMARY;
-  const img = await loadImage(imageUrl);
-  const fontFam = "var(--font-caslon), serif";
-  const monoFont = "var(--font-jetbrains), monospace";
-
   // Background
-  ctx.fillStyle = BG_COLOR;
-  ctx.fillRect(0, 0, SIZE, SIZE);
+  ctx.fillStyle = "#003B25"; // Dark Green background
+  if (config.style === "GRID") ctx.fillStyle = "#050505"; // Black for grid
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+  // Common styles
+  const drawBaseGrid = () => {
+     drawGrid(ctx, WIDTH, HEIGHT, 120, "rgba(245, 241, 230, 0.1)");
+  };
+  
+  const drawCircularPhoto = async (x: number, y: number, r: number) => {
+    try {
+      const img = await loadImage(imageUrl);
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.closePath();
+      ctx.clip();
+      drawImageCover(ctx, img, x - r, y - r, r * 2, r * 2, scale, panX, panY, config.look);
+      ctx.restore();
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const drawSquarePhoto = async (x: number, y: number, size: number) => {
+    try {
+      const img = await loadImage(imageUrl);
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(x, y, size, size);
+      ctx.closePath();
+      ctx.clip();
+      drawImageCover(ctx, img, x, y, size, size, scale, panX, panY, config.look);
+      ctx.restore();
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   if (config.style === "CORE") {
-    // 2. Branding Frame
-    ctx.lineWidth = 20;
-    ctx.strokeStyle = BORDER;
-    ctx.strokeRect(10, 10, SIZE - 20, SIZE - 20);
+    // ---------------------------------------------------------
+    // CORE: Large circular photo, thin ring, simple typography
+    // ---------------------------------------------------------
+    ctx.fillStyle = "#050505";
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    
+    const r = 400;
+    const cx = WIDTH / 2;
+    const cy = HEIGHT / 2;
 
-    drawText(ctx, "HH GOA 2026", SIZE / 2, 75, `bold 46px ${fontFam}`, PRIMARY, "center", "middle");
-    
-    // 3. User Photo (Hero - 80% of canvas)
-    const PADDING = 120;
-    const photoSize = SIZE - PADDING * 2;
-    
-    // Shadow for circular photo
-    const offset = 24;
-    ctx.fillStyle = SECONDARY;
+    // Ring
     ctx.beginPath();
-    ctx.arc(PADDING + photoSize/2 + offset, PADDING + photoSize/2 + offset, photoSize/2, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // Photo Border (Customizable)
+    ctx.arc(cx, cy, r + 20, 0, Math.PI * 2);
+    ctx.strokeStyle = ringColor;
     ctx.lineWidth = config.ringWeight;
-    ctx.strokeStyle = ringHex;
-    ctx.beginPath();
-    ctx.arc(PADDING + photoSize/2, PADDING + photoSize/2, photoSize/2, 0, Math.PI * 2);
     ctx.stroke();
 
-    // Photo Masking
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(PADDING + photoSize/2, PADDING + photoSize/2, photoSize/2, 0, Math.PI * 2);
-    ctx.clip();
-    drawImageCover(ctx, img, PADDING, PADDING, photoSize, photoSize, scale, panX, panY, config.look);
-    ctx.restore();
+    // The photo
+    await drawCircularPhoto(cx, cy, r);
+
+    // Simple branding
+    drawText(ctx, "HACKER HOUSE GOA 2026", WIDTH/2, HEIGHT - 50, `bold 24px ${monoFont}`, "#F5F1E6", "center");
 
   } else if (config.style === "SIGNAL") {
-    // Technical Grid Background
-    ctx.strokeStyle = "rgba(255,255,255,0.1)";
+    // ---------------------------------------------------------
+    // SIGNAL: Radar-like, technical markers, neon accents
+    // ---------------------------------------------------------
+    const cx = WIDTH / 2;
+    const cy = HEIGHT / 2;
+    const r = 400;
+    
+    // Technical crosshairs
+    ctx.strokeStyle = "rgba(255, 229, 0, 0.4)"; // Faded yellow
     ctx.lineWidth = 2;
-    for (let i = 0; i < SIZE; i += 100) {
-      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, SIZE); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(SIZE, i); ctx.stroke();
-    }
+    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(WIDTH, cy); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, HEIGHT); ctx.stroke();
     
-    const PADDING = 140;
-    const photoSize = SIZE - PADDING * 2;
-    const center = SIZE / 2;
+    // Multiple thin rings
+    ctx.strokeStyle = "rgba(245, 241, 230, 0.2)";
+    ctx.beginPath(); ctx.arc(cx, cy, r + 60, 0, Math.PI*2); ctx.stroke();
+    ctx.beginPath(); ctx.arc(cx, cy, r + 120, 0, Math.PI*2); ctx.stroke();
 
-    // Technical Ring
-    ctx.lineWidth = config.ringWeight;
-    ctx.strokeStyle = ringHex;
-    ctx.setLineDash([20, 10]);
+    // Solid ring behind photo
+    ctx.fillStyle = ringColor;
+    ctx.beginPath(); ctx.arc(cx, cy, r + config.ringWeight, 0, Math.PI*2); ctx.fill();
+
+    await drawCircularPhoto(cx, cy, r);
+
+    // Accent boxes
+    ctx.fillStyle = COLOR_MAP.PINK;
+    ctx.fillRect(cx - 10, cy - r - 80, 20, 40);
+    ctx.fillRect(cx - 10, cy + r + 40, 20, 40);
+
+    drawText(ctx, "SIGNAL_DETECTED", 40, 60, `bold 24px ${monoFont}`, "#F5F1E6", "left");
+    drawText(ctx, "HHG-26", WIDTH - 40, 60, `bold 24px ${monoFont}`, COLOR_MAP.PINK, "right");
+    drawText(ctx, "15.4909° N, 73.8278° E", 40, HEIGHT - 40, `bold 24px ${monoFont}`, ringColor, "left");
+
+  } else if (config.style === "SIGNAL_01") {
+    // ---------------------------------------------------------
+    // SIGNAL_01: Darker green, grid, dashed yellow circle, neon logo
+    // ---------------------------------------------------------
+    const r = 380;
+    const cx = WIDTH / 2;
+    const cy = HEIGHT / 2;
+
+    // Darker green background
+    ctx.fillStyle = "#002B1A";
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+
+    // Subtle texture noise
+    const drawNoise = (opacity: number) => {
+      const imgData = ctx.getImageData(0, 0, WIDTH, HEIGHT);
+      const data = imgData.data;
+      for (let i = 0; i < data.length; i += 4) {
+        const val = Math.random() * 255;
+        data[i] = (data[i] * (1 - opacity)) + (val * opacity);
+        data[i+1] = (data[i+1] * (1 - opacity)) + (val * opacity);
+        data[i+2] = (data[i+2] * (1 - opacity)) + (val * opacity);
+      }
+      ctx.putImageData(imgData, 0, 0);
+    };
+    drawNoise(0.04);
+
+    // Grid
+    drawGrid(ctx, WIDTH, HEIGHT, 100, "rgba(245, 241, 230, 0.15)");
+
+    // Text Top Left
+    drawText(ctx, "HHG // 2026", 40, 60, `bold 18px ${monoFont}`, ringColor, "left");
+    drawText(ctx, "SIGNAL 01", 40, 90, `bold 18px ${monoFont}`, "#F5F1E6", "left");
+
+    // The photo
+    await drawCircularPhoto(cx, cy, r);
+
+    // Dashed Ring
+    ctx.save();
     ctx.beginPath();
-    ctx.arc(center, center, photoSize/2 + 15, 0, Math.PI * 2);
+    ctx.arc(cx, cy, r + 20, 0, Math.PI * 2);
+    ctx.strokeStyle = ringColor;
+    ctx.lineWidth = Math.max(10, config.ringWeight);
+    ctx.setLineDash([20, 15]);
     ctx.stroke();
-    ctx.setLineDash([]);
-
-    // Photo
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(center, center, photoSize/2, 0, Math.PI * 2);
-    ctx.clip();
-    drawImageCover(ctx, img, PADDING, PADDING, photoSize, photoSize, scale, panX, panY, config.look);
     ctx.restore();
 
-    // Labels
-    drawText(ctx, "HHG // 2026", 40, 50, `bold 24px ${monoFont}`, PRIMARY, "left", "top");
-    drawText(ctx, "SIGNAL 01", 40, 85, `bold 24px ${monoFont}`, WHITE, "left", "top");
-    drawText(ctx, "BUILD // SHIP // CREATE", SIZE - 40, SIZE - 40, `bold 20px ${monoFont}`, SECONDARY, "right", "bottom");
+    // Text Bottom Right
+    drawText(ctx, "BUILD // SHIP // CREATE", WIDTH - 40, HEIGHT - 40, `bold 18px ${monoFont}`, COLOR_MAP.PINK, "right");
 
-  } else if (config.style === "EDITORIAL") {
-    // Asymmetrical Layout
-    const photoSize = 700;
-    const paddingX = 80;
-    const paddingY = 80;
-
-    // Large cropped text
-    drawText(ctx, "HH GOA", -20, 250, `900 200px 'Hanken Grotesk', sans-serif`, "rgba(255,255,255,0.05)", "left", "alphabetic");
-    
-    // Photo Square
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(SIZE - photoSize - paddingX, SIZE - photoSize - paddingY, photoSize, photoSize);
-    ctx.clip();
-    drawImageCover(ctx, img, SIZE - photoSize - paddingX, SIZE - photoSize - paddingY, photoSize, photoSize, scale, panX, panY, config.look);
-    ctx.restore();
-
-    // Ring becomes a solid block decoration
-    ctx.fillStyle = ringHex;
-    ctx.fillRect(SIZE - photoSize - paddingX - 40, SIZE - photoSize - paddingY + 100, 40, 200);
-
-    drawText(ctx, "EVENT POSTER", paddingX, SIZE - 120, `bold 30px ${monoFont}`, WHITE, "left", "bottom");
-    drawText(ctx, "2026", paddingX, SIZE - 80, `bold 30px ${monoFont}`, PRIMARY, "left", "bottom");
+    // Logo Overlaid at Bottom
+    try {
+      const logo = await loadImage(logoUrl);
+      const logoWidth = 240;
+      const ratio = logo.height / logo.width;
+      const logoHeight = logoWidth * ratio;
+      // Draw solid block behind logo
+      ctx.fillStyle = "#002B1A";
+      ctx.fillRect(cx - logoWidth/2 - 20, HEIGHT - logoHeight - 20, logoWidth + 40, logoHeight + 20);
+      
+      ctx.drawImage(logo, cx - logoWidth/2, HEIGHT - logoHeight - 10, logoWidth, logoHeight);
+    } catch (e) {
+      console.error(e);
+    }
 
   } else if (config.style === "WILD") {
-    const PADDING = 100;
-    const photoSize = SIZE - PADDING * 2;
-    
-    // Broken geometry background
-    ctx.fillStyle = SECONDARY;
-    ctx.fillRect(0, 0, SIZE, 400);
-    ctx.fillStyle = PRIMARY;
-    ctx.beginPath(); ctx.moveTo(0, 400); ctx.lineTo(SIZE, 200); ctx.lineTo(SIZE, SIZE); ctx.lineTo(0, SIZE); ctx.fill();
+    // ---------------------------------------------------------
+    // WILD: Text wrapped around the ring, no background elements
+    // ---------------------------------------------------------
+    const cx = WIDTH / 2;
+    const cy = HEIGHT / 2;
+    const r = 360;
 
-    // Heavy offset shadows
-    ctx.fillStyle = BORDER;
-    ctx.fillRect(PADDING + 40, PADDING + 40, photoSize, photoSize);
+    ctx.fillStyle = "#002718";
+    ctx.fillRect(0,0,WIDTH,HEIGHT);
 
-    // Photo Box
+    // Inner ring
+    ctx.strokeStyle = ringColor;
+    ctx.lineWidth = config.ringWeight;
+    ctx.beginPath(); ctx.arc(cx, cy, r + 15, 0, Math.PI*2); ctx.stroke();
+
+    await drawCircularPhoto(cx, cy, r);
+
+    // Draw radial text manually
     ctx.save();
-    ctx.beginPath();
-    ctx.rect(PADDING, PADDING, photoSize, photoSize);
-    ctx.clip();
-    drawImageCover(ctx, img, PADDING, PADDING, photoSize, photoSize, scale, panX, panY, config.look);
+    ctx.translate(cx, cy);
+    const text = " HACKER HOUSE GOA 2026 // BUILDER PROFILE // ";
+    ctx.font = `bold 36px ${monoFont}`;
+    ctx.fillStyle = "#F5F1E6";
+    const angleStep = (Math.PI * 2) / text.length;
+    for (let i = 0; i < text.length; i++) {
+      ctx.save();
+      ctx.rotate(i * angleStep - Math.PI / 2);
+      ctx.fillText(text[i], 0, -r - 40);
+      ctx.restore();
+    }
     ctx.restore();
 
-    // Ring becomes heavy border
-    ctx.lineWidth = config.ringWeight * 2;
-    ctx.strokeStyle = ringHex;
-    ctx.strokeRect(PADDING, PADDING, photoSize, photoSize);
+  } else if (config.style === "GRID") {
+    // ---------------------------------------------------------
+    // GRID: Square photo, brutalist borders, neon grid
+    // ---------------------------------------------------------
+    drawGrid(ctx, WIDTH, HEIGHT, 90, "rgba(255, 229, 0, 0.15)"); // Yellow faint grid
 
-    // Typography
-    drawText(ctx, "HH GOA", SIZE/2, 100, `900 120px 'Hanken Grotesk', sans-serif`, BORDER, "center", "alphabetic");
+    const size = 700;
+    const x = (WIDTH - size) / 2;
+    const y = (HEIGHT - size) / 2;
+
+    // Hard drop shadow
+    ctx.fillStyle = ringColor;
+    ctx.fillRect(x + 20, y + 20, size, size);
+
+    await drawSquarePhoto(x, y, size);
+
+    // Crop marks
+    drawCropMarks(ctx, x, y, 30, COLOR_MAP.PINK, 4);
+    drawCropMarks(ctx, x + size, y, 30, COLOR_MAP.PINK, 4);
+    drawCropMarks(ctx, x, y + size, 30, COLOR_MAP.PINK, 4);
+    drawCropMarks(ctx, x + size, y + size, 30, COLOR_MAP.PINK, 4);
+
+    // Microcopy
+    drawText(ctx, "SYS.ON", 40, 60, `bold 24px ${monoFont}`, "#F5F1E6", "left");
+    drawText(ctx, "FRAME IN GOA", WIDTH/2, 60, `bold 24px ${monoFont}`, "#F5F1E6", "center");
+    drawText(ctx, "X-COOR: 0", WIDTH - 40, 60, `bold 24px ${monoFont}`, "#F5F1E6", "right");
+
+    drawText(ctx, "2026", 40, HEIGHT - 40, `400 80px ${displayFont}`, ringColor, "left");
+    drawText(ctx, "GOA", WIDTH - 40, HEIGHT - 40, `400 80px ${displayFont}`, ringColor, "right");
   }
 
-  // 3.5 AI Overlay (Full Canvas)
+  // AI Overlay (Full Canvas) - Global for all templates
   if (config.aiOverlayUrl) {
     try {
       const aiImg = await loadImage(config.aiOverlayUrl);
       ctx.save();
       ctx.globalCompositeOperation = "screen";
-      ctx.drawImage(aiImg, 0, 0, SIZE, SIZE);
+      ctx.globalAlpha = 0.8;
+      ctx.drawImage(aiImg, 0, 0, WIDTH, HEIGHT);
       ctx.restore();
     } catch (e) {
       console.error("Failed to load AI overlay", e);
     }
   }
 
-  // 4. Bottom Logo
-  try {
-    const logo = await loadImage(logoUrl);
-    const logoW = 280;
-    const logoH = (logo.height / logo.width) * logoW;
-    ctx.drawImage(logo, SIZE / 2 - logoW / 2, SIZE - 90 - logoH / 2, logoW, logoH);
-  } catch (e) {
-    drawText(ctx, "HACKER HOUSE", SIZE / 2, SIZE - 75, `bold 42px ${fontFam}`, PRIMARY, "center", "middle");
-  }
-
-  // Export
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob) resolve(blob);

@@ -52,12 +52,12 @@ export function drawImageCover(
     
     // Green Screen
     ctx.globalCompositeOperation = "screen";
-    ctx.fillStyle = "#006B3F"; // HH Green
+    ctx.fillStyle = "#005C36"; // Deep Hacker Green
     ctx.fillRect(x, y, w, h);
     
     // Yellow Multiply
     ctx.globalCompositeOperation = "multiply";
-    ctx.fillStyle = "#FFF000"; // HH Yellow
+    ctx.fillStyle = "#FFE500"; // Electric Yellow
     ctx.fillRect(x, y, w, h);
   } else if (look === "GRAIN") {
     // Draw normal
@@ -139,4 +139,57 @@ export function drawBrutalistFrame(
     ctx.strokeRect(x + gap, y + gap, w - gap * 2, h - gap * 2);
     ctx.restore();
   }
+}
+
+// -- NEW EDITORIAL DRAWING UTILITIES --
+
+export function drawGrid(ctx: CanvasRenderingContext2D, width: number, height: number, cellSize: number, color: string) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([2, 4]);
+  
+  for (let x = 0; x <= width; x += cellSize) {
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, height);
+    ctx.stroke();
+  }
+  for (let y = 0; y <= height; y += cellSize) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(width, y);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+export function drawCropMarks(ctx: CanvasRenderingContext2D, x: number, y: number, size: number, color: string, thickness: number = 2) {
+  ctx.save();
+  ctx.strokeStyle = color;
+  ctx.lineWidth = thickness;
+  ctx.setLineDash([]);
+  
+  // Top-left
+  ctx.beginPath(); ctx.moveTo(x - size, y); ctx.lineTo(x - size/4, y); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(x, y - size); ctx.lineTo(x, y - size/4); ctx.stroke();
+  
+  // Crosshair
+  ctx.beginPath(); ctx.arc(x, y, size/3, 0, Math.PI * 2); ctx.stroke();
+  
+  ctx.restore();
+}
+
+export function drawBarcode(ctx: CanvasRenderingContext2D, x: number, y: number, width: number, height: number, color: string) {
+  ctx.save();
+  ctx.fillStyle = color;
+  let currentX = x;
+  // Deterministic random so it doesn't flicker on re-render? For now just Math.random
+  while (currentX < x + width) {
+    const barWidth = Math.random() * 8 + 2;
+    if (currentX + barWidth > x + width) break;
+    ctx.fillRect(currentX, y, barWidth, height);
+    currentX += barWidth + (Math.random() * 6 + 2); // gap
+  }
+  ctx.restore();
 }

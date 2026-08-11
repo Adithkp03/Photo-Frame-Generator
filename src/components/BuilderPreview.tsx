@@ -54,10 +54,10 @@ export default function BuilderPreview({
         const finalBlob = await renderBuilderID(
           canvasRef.current, 
           imageUrl, 
+          "/branding/logo.png",
           safeName, 
           safeRole, 
           title, 
-          "/branding/logo.png",
           scale,
           panX,
           panY,
@@ -134,7 +134,7 @@ export default function BuilderPreview({
       const shareUrl = `${appUrl}/share/${data.id}`;
       
       const text = encodeURIComponent(`Just built my HH Goa 2026 identity.\n\n${title}\n#FrameInGoa\n\n`);
-      window.open(`https://x.com/intent/post?text=${text}&url=${encodeURIComponent(shareUrl)}`, "_blank", "noopener,noreferrer");
+      window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(shareUrl)}`, "_blank", "noopener,noreferrer");
     } catch (err) {
       console.error(err);
       setShareError("Share link couldn't be created.");

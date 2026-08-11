@@ -1,22 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import ImageUploader from "@/components/ImageUploader";
 import PFPPreview from "@/components/PFPPreview";
 import BuilderPreview from "@/components/BuilderPreview";
 import IdentityPackPreview from "@/components/IdentityPackPreview";
 import BoardingPassPreview from "@/components/BoardingPassPreview";
+import EditorialPreview from "@/components/EditorialPreview";
 import AIFrameLab from "@/components/AIFrameLab";
 import StyleSelector from "@/components/StyleSelector";
 import PhotoControls from "@/components/PhotoControls";
 import HistorySidebar from "@/components/HistorySidebar";
-import { getRandomPFPConfig, getRandomBuilderConfig } from "@/lib/randomizer";
+import { getRandomPFPConfig, getRandomBuilderConfig, getRandomBoardingPassConfig, getRandomEditorialConfig } from "@/lib/randomizer";
 import { generateBuilderTitle } from "@/lib/builderLogic";
-import { PFPConfig, BuilderConfig, HistoryItem, PFPRingColor } from "@/lib/types";
-import { BoardingPassConfig } from "@/lib/templates/boarding-pass";
+import { Format, PFPConfig, BuilderConfig, HistoryItem, PFPRingColor, EditorialConfig, BoardingPassConfig } from "@/lib/types";
 import { Loader2, Shuffle, ArrowRight, Home as HomeIcon } from "lucide-react";
 
-type Format = "PFP" | "BUILDER" | "PASS" | "PACK";
 type AppState = "LANDING" | "UPLOAD" | "EDITOR";
 
 const RING_COLORS: PFPRingColor[] = ["YELLOW", "GREEN", "PINK", "WHITE", "BLACK"];
@@ -30,6 +29,14 @@ export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [name, setName] = useState("");
   const [role, setRole] = useState("");
+  const [twitter, setTwitter] = useState("");
+  const [linkedin, setLinkedin] = useState("");
+  const [github, setGithub] = useState("");
+  const [email, setEmail] = useState("");
+  const [location, setLocation] = useState("");
+  const [techStack, setTechStack] = useState("");
+  const [builderClass, setBuilderClass] = useState("");
+  const [passId, setPassId] = useState(`HH26-${Math.random().toString(36).substring(2, 8).toUpperCase()}`);
   const [builderTitle, setBuilderTitle] = useState("THE MAKER");
   const [titleSeed, setTitleSeed] = useState(0);
   
@@ -40,11 +47,27 @@ export default function Home() {
 
   // Config State
   const [pfpConfig, setPfpConfig] = useState<PFPConfig>({ style: "CORE", ringColor: "YELLOW", ringWeight: 10, look: "AS_SHOT" });
-  const [builderConfig, setBuilderConfig] = useState<BuilderConfig>({ template: "IDENTITY", look: "AS_SHOT" });
-  const [passConfig, setPassConfig] = useState<BoardingPassConfig>({ look: "AS_SHOT" });
+  const [builderConfig, setBuilderConfig] = useState<BuilderConfig>({ template: "CREDENTIAL", look: "AS_SHOT" });
+  const [boardingPassConfig, setBoardingPassConfig] = useState<BoardingPassConfig>({ look: "AS_SHOT" });
+  const [editorialConfig, setEditorialConfig] = useState<EditorialConfig>({ style: "TYPOGRAPHIC", look: "AS_SHOT" });
   const [isGeneratingAi, setIsGeneratingAi] = useState(false);
   
   const [history, setHistory] = useState<HistoryItem[]>([]);
+
+  // Memoize builder config to prevent infinite render loops in previews
+  const mergedBuilderConfig = useMemo(() => {
+    return {
+      ...builderConfig,
+      twitter,
+      linkedin,
+      github,
+      email,
+      location,
+      techStack,
+      builderClass,
+      passId
+    };
+  }, [builderConfig, twitter, linkedin, github, email, location, techStack, builderClass, passId]);
 
   // Update Title on Role change
   useEffect(() => {
@@ -69,7 +92,7 @@ export default function Home() {
     setPanX(0);
     setPanY(0);
     setPfpConfig({ style: "CORE", ringColor: "YELLOW", ringWeight: 10, look: "AS_SHOT" });
-    setBuilderConfig({ template: "IDENTITY", look: "AS_SHOT" });
+    setBuilderConfig({ template: "CREDENTIAL", look: "AS_SHOT" });
   };
 
   const handleFormatSelect = (format: Format) => {
@@ -84,9 +107,18 @@ export default function Home() {
   const handleSurpriseMe = () => {
     if (activeFormat === "PFP") {
       setPfpConfig(getRandomPFPConfig(pfpConfig));
-    } else {
+    } else if (activeFormat === "BUILDER") {
       setBuilderConfig(getRandomBuilderConfig(builderConfig));
       setTitleSeed(s => s + 1);
+    } else if (activeFormat === "PASS") {
+      setBoardingPassConfig(getRandomBoardingPassConfig(boardingPassConfig));
+    } else if (activeFormat === "PACK") {
+      setPfpConfig(getRandomPFPConfig(pfpConfig));
+      setBuilderConfig(getRandomBuilderConfig(builderConfig));
+      setBoardingPassConfig(getRandomBoardingPassConfig(boardingPassConfig));
+      setTitleSeed(s => s + 1);
+    } else if (activeFormat === "EDITORIAL") {
+      setEditorialConfig(getRandomEditorialConfig(editorialConfig));
     }
   };
 
@@ -99,6 +131,8 @@ export default function Home() {
         format: activeFormat,
         pfpConfig: activeFormat === "PFP" ? { ...pfpConfig } : undefined,
         builderConfig: activeFormat === "BUILDER" ? { ...builderConfig } : undefined,
+        passConfig: activeFormat === "PASS" ? { ...boardingPassConfig } : undefined,
+        editorialConfig: activeFormat === "EDITORIAL" ? { ...editorialConfig } : undefined,
         title: activeFormat === "BUILDER" ? builderTitle : undefined,
         thumbnail: dataUrl
       };
@@ -118,6 +152,8 @@ export default function Home() {
       setBuilderConfig(item.builderConfig);
       if (item.title) setBuilderTitle(item.title);
     }
+    if (item.format === "PASS" && item.passConfig) setBoardingPassConfig(item.passConfig);
+    if (item.format === "EDITORIAL" && item.editorialConfig) setEditorialConfig(item.editorialConfig);
   };
 
   return (
@@ -152,40 +188,38 @@ export default function Home() {
                 <h2 className="font-serif text-4xl font-bold text-primary">IDENTITY STUDIO</h2>
                 <p className="font-sans text-xl font-bold opacity-90 text-on-surface">Create your official HH Goa 2026 PFP or Builder Identity.</p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-8 w-full justify-center">
-                <button onClick={() => handleFormatSelect("PFP")} className="group flex-1 flex flex-col items-center p-8 bg-black/20 backdrop-blur-xl rounded-[2rem] border border-white/10 hover:border-white/30 hover:-translate-y-2 hover:shadow-[0_10px_40px_-10px_rgba(243,231,0,0.3)] transition-all text-left">
-                  <div className="w-32 h-32 rounded-full border-4 border-white/20 group-hover:border-primary group-hover:shadow-[0_0_20px_rgba(243,231,0,0.4)] bg-black/40 mb-6 flex items-center justify-center overflow-hidden transition-all"><span className="font-sans font-bold text-primary tracking-widest">PFP</span></div>
-                  <h4 className="font-sans font-bold text-2xl text-white uppercase w-full text-center tracking-widest">PFP FRAME</h4>
-                  <p className="font-mono text-sm text-white/50 mt-2 text-center">Your X profile picture</p>
+              <div className="grid grid-cols-2 gap-4 sm:gap-8 w-full justify-center">
+                <button onClick={() => handleFormatSelect("PFP")} className="group flex-1 flex flex-col items-center p-4 sm:p-8 bg-black/20 backdrop-blur-xl rounded-[2rem] border border-white/10 hover:border-white/30 hover:-translate-y-2 hover:shadow-[0_10px_40px_-10px_rgba(243,231,0,0.3)] transition-all text-left">
+                  <div className="w-16 h-16 sm:w-32 sm:h-32 rounded-full border-2 sm:border-4 border-white/20 group-hover:border-primary group-hover:shadow-[0_0_20px_rgba(243,231,0,0.4)] bg-black/40 mb-4 sm:mb-6 flex items-center justify-center overflow-hidden transition-all"><span className="font-sans font-bold text-primary tracking-widest text-xs sm:text-base">PFP</span></div>
+                  <h4 className="font-sans font-bold text-lg sm:text-2xl text-white uppercase w-full text-center tracking-widest">PFP FRAME</h4>
+                  <p className="font-mono text-[10px] sm:text-sm text-white/50 mt-1 sm:mt-2 text-center">Your X profile picture</p>
                 </button>
-                <button onClick={() => handleFormatSelect("BUILDER")} className="group flex-1 flex flex-col items-center p-8 bg-black/20 backdrop-blur-xl rounded-[2rem] border border-white/10 hover:border-white/30 hover:-translate-y-2 hover:shadow-[0_10px_40px_-10px_rgba(255,0,127,0.3)] transition-all text-left">
-                  <div className="w-24 h-32 border border-white/20 group-hover:border-secondary group-hover:shadow-[0_0_20px_rgba(255,0,127,0.4)] bg-black/40 mb-6 flex flex-col items-center justify-start p-3 rounded-xl transition-all">
-                    <div className="w-full h-12 bg-white/10 rounded mb-3"></div>
-                    <div className="w-full h-2 bg-white/20 rounded mb-2"></div>
-                    <div className="w-1/2 h-2 bg-white/20 rounded self-start"></div>
+                <button onClick={() => handleFormatSelect("BUILDER")} className="group flex-1 flex flex-col items-center p-4 sm:p-8 bg-black/20 backdrop-blur-xl rounded-[2rem] border border-white/10 hover:border-white/30 hover:-translate-y-2 hover:shadow-[0_10px_40px_-10px_rgba(255,0,127,0.3)] transition-all text-left">
+                  <div className="w-12 h-16 sm:w-24 sm:h-32 border border-white/20 group-hover:border-secondary group-hover:shadow-[0_0_20px_rgba(255,0,127,0.4)] bg-black/40 mb-4 sm:mb-6 flex flex-col items-center justify-start p-2 sm:p-3 rounded-xl transition-all">
+                    <div className="w-full h-6 sm:h-12 bg-white/10 rounded mb-2 sm:mb-3"></div>
+                    <div className="w-full h-1 sm:h-2 bg-white/20 rounded mb-1 sm:mb-2"></div>
+                    <div className="w-1/2 h-1 sm:h-2 bg-white/20 rounded self-start"></div>
                   </div>
-                  <h4 className="font-sans font-bold text-2xl text-white uppercase w-full text-center tracking-widest">BUILDER ID</h4>
-                  <p className="font-mono text-sm text-white/50 mt-2 text-center">Your HH Goa digital identity</p>
+                  <h4 className="font-sans font-bold text-lg sm:text-2xl text-white uppercase w-full text-center tracking-widest">BUILDER ID</h4>
+                  <p className="font-mono text-[10px] sm:text-sm text-white/50 mt-1 sm:mt-2 text-center">Your digital identity</p>
                 </button>
-              </div>
-              <div className="flex flex-col sm:flex-row gap-8 w-full justify-center">
-                <button onClick={() => handleFormatSelect("PASS")} className="group flex-1 flex flex-col items-center p-8 bg-black/20 backdrop-blur-xl rounded-[2rem] border border-white/10 hover:border-white/30 hover:-translate-y-2 hover:shadow-[0_10px_40px_-10px_rgba(255,240,0,0.3)] transition-all text-left">
-                  <div className="w-24 h-32 border border-white/20 group-hover:border-primary group-hover:shadow-[0_0_20px_rgba(255,240,0,0.4)] bg-black/40 mb-6 flex flex-col items-center justify-start p-3 rounded-xl transition-all">
-                    <div className="w-full h-8 bg-primary rounded mb-3"></div>
-                    <div className="w-full h-2 bg-white/20 rounded mb-2"></div>
-                    <div className="w-1/2 h-2 bg-white/20 rounded self-start"></div>
+                <button onClick={() => handleFormatSelect("PASS")} className="group flex-1 flex flex-col items-center p-4 sm:p-8 bg-black/20 backdrop-blur-xl rounded-[2rem] border border-white/10 hover:border-white/30 hover:-translate-y-2 hover:shadow-[0_10px_40px_-10px_rgba(255,240,0,0.3)] transition-all text-left">
+                  <div className="w-12 h-16 sm:w-24 sm:h-32 border border-white/20 group-hover:border-primary group-hover:shadow-[0_0_20px_rgba(255,240,0,0.4)] bg-black/40 mb-4 sm:mb-6 flex flex-col items-center justify-start p-2 sm:p-3 rounded-xl transition-all">
+                    <div className="w-full h-4 sm:h-8 bg-primary rounded mb-2 sm:mb-3"></div>
+                    <div className="w-full h-1 sm:h-2 bg-white/20 rounded mb-1 sm:mb-2"></div>
+                    <div className="w-1/2 h-1 sm:h-2 bg-white/20 rounded self-start"></div>
                   </div>
-                  <h4 className="font-sans font-bold text-2xl text-white uppercase w-full text-center tracking-widest">BOARDING PASS</h4>
-                  <p className="font-mono text-sm text-white/50 mt-2 text-center">Your event entry pass</p>
+                  <h4 className="font-sans font-bold text-lg sm:text-2xl text-white uppercase w-full text-center tracking-widest">ENTRY PASS</h4>
+                  <p className="font-mono text-[10px] sm:text-sm text-white/50 mt-1 sm:mt-2 text-center">Your event entry pass</p>
                 </button>
-                <button onClick={() => handleFormatSelect("PACK")} className="group flex-1 flex flex-col items-center p-8 bg-black/20 backdrop-blur-xl rounded-[2rem] border border-primary hover:border-primary hover:-translate-y-2 hover:shadow-[0_10px_40px_-10px_rgba(255,240,0,0.3)] transition-all text-left">
-                  <div className="w-24 h-32 border border-primary/50 group-hover:border-primary group-hover:shadow-[0_0_20px_rgba(255,240,0,0.4)] bg-primary/10 mb-6 flex items-center justify-center p-3 rounded-xl transition-all relative">
-                    <div className="w-10 h-14 bg-white/20 absolute -left-2 top-4 rotate-[-15deg] rounded"></div>
-                    <div className="w-10 h-14 bg-white/20 absolute -right-2 top-4 rotate-[15deg] rounded"></div>
-                    <div className="w-14 h-20 bg-primary rounded z-10 border border-black shadow-lg"></div>
+                <button onClick={() => handleFormatSelect("PACK")} className="group flex-1 flex flex-col items-center p-4 sm:p-8 bg-black/20 backdrop-blur-xl rounded-[2rem] border border-primary hover:border-primary hover:-translate-y-2 hover:shadow-[0_10px_40px_-10px_rgba(255,240,0,0.3)] transition-all text-left">
+                  <div className="w-12 h-16 sm:w-24 sm:h-32 border border-primary/50 group-hover:border-primary group-hover:shadow-[0_0_20px_rgba(255,240,0,0.4)] bg-primary/10 mb-4 sm:mb-6 flex items-center justify-center p-2 sm:p-3 rounded-xl transition-all relative">
+                    <div className="w-6 h-8 sm:w-10 sm:h-14 bg-white/20 absolute -left-1 sm:-left-2 top-2 sm:top-4 rotate-[-15deg] rounded"></div>
+                    <div className="w-6 h-8 sm:w-10 sm:h-14 bg-white/20 absolute -right-1 sm:-right-2 top-2 sm:top-4 rotate-[15deg] rounded"></div>
+                    <div className="w-8 h-10 sm:w-14 sm:h-20 bg-primary rounded z-10 border border-black shadow-lg"></div>
                   </div>
-                  <h4 className="font-sans font-bold text-2xl text-primary uppercase w-full text-center tracking-widest">IDENTITY PACK</h4>
-                  <p className="font-mono text-sm text-primary/70 mt-2 text-center">Get all three at once</p>
+                  <h4 className="font-sans font-bold text-lg sm:text-2xl text-primary uppercase w-full text-center tracking-widest">ID PACK</h4>
+                  <p className="font-mono text-[10px] sm:text-sm text-primary/70 mt-1 sm:mt-2 text-center">Get all three</p>
                 </button>
               </div>
             </div>
@@ -238,7 +272,7 @@ export default function Home() {
                        onReset={handleStartOver} 
                        name={name} role={role} title={builderTitle}
                        scale={scale} panX={panX} panY={panY} 
-                       config={builderConfig} 
+                       config={mergedBuilderConfig} 
                        showActions={true}
                        onRemix={handleSurpriseMe}
                        onThumbnailRendered={handleThumbnailRendered}
@@ -250,7 +284,7 @@ export default function Home() {
                        onReset={handleStartOver} 
                        name={name} role={role} title={builderTitle} builderNumber="HHG / 024"
                        scale={scale} panX={panX} panY={panY} 
-                       config={passConfig} 
+                       config={boardingPassConfig} 
                        showActions={true}
                      />
                    )}
@@ -264,8 +298,8 @@ export default function Home() {
                      name={name} role={role} title={builderTitle} builderNumber="HHG / 024"
                      scale={scale} panX={panX} panY={panY} 
                      pfpConfig={pfpConfig} 
-                     builderConfig={builderConfig} 
-                     passConfig={passConfig}
+                     builderConfig={mergedBuilderConfig} 
+                     passConfig={boardingPassConfig}
                      onReset={handleStartOver} 
                      onEdit={() => setActiveFormat("PFP")}
                   />
@@ -282,13 +316,21 @@ export default function Home() {
                   </button>
                 </div>
 
-                {activeFormat !== "PASS" && (
                   <StyleSelector 
-                    type={activeFormat as "PFP" | "BUILDER"} 
-                    activeStyle={activeFormat === "PFP" ? pfpConfig.style : builderConfig.template}
-                    onSelect={(s) => activeFormat === "PFP" ? setPfpConfig({ ...pfpConfig, style: s as any }) : setBuilderConfig({ ...builderConfig, template: s as any })} 
+                    type={activeFormat as "PFP" | "BUILDER" | "PASS" | "EDITORIAL"} 
+                    activeStyle={
+                      activeFormat === "PFP" ? pfpConfig.style : 
+                      activeFormat === "BUILDER" ? builderConfig.template : 
+                      activeFormat === "PASS" ? boardingPassConfig.style! : 
+                      editorialConfig.style!
+                    }
+                    onSelect={(s) => {
+                      if (activeFormat === "PFP") setPfpConfig({ ...pfpConfig, style: s as any });
+                      else if (activeFormat === "BUILDER") setBuilderConfig({ ...builderConfig, template: s as any });
+                      else if (activeFormat === "PASS") setBoardingPassConfig({ ...boardingPassConfig, style: s as any });
+                      else if (activeFormat === "EDITORIAL") setEditorialConfig({ ...editorialConfig, style: s as any });
+                    }} 
                   />
-                )}
 
                 {/* Builder Form */}
                 {activeFormat === "BUILDER" && (
@@ -302,6 +344,38 @@ export default function Home() {
                       <div className="flex flex-col gap-2">
                         <label className="font-sans font-bold text-sm uppercase text-white/70">Role / Stack</label>
                         <input type="text" value={role} onChange={(e) => setRole(e.target.value)} maxLength={35} className="bg-white/5 border border-white/20 rounded-xl p-4 font-sans text-lg font-bold text-white placeholder:text-white/30 focus:outline-none focus:border-primary focus:bg-white/10 transition-colors" placeholder="FULLSTACK DEV" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="font-sans font-bold text-sm uppercase text-white/70">Twitter / X</label>
+                        <input type="text" value={twitter} onChange={(e) => setTwitter(e.target.value)} maxLength={25} className="bg-white/5 border border-white/20 rounded-xl p-3 font-sans text-sm font-bold text-white placeholder:text-white/30 focus:outline-none focus:border-primary focus:bg-white/10 transition-colors" placeholder="@username" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="font-sans font-bold text-sm uppercase text-white/70">LinkedIn</label>
+                        <input type="text" value={linkedin} onChange={(e) => setLinkedin(e.target.value)} maxLength={35} className="bg-white/5 border border-white/20 rounded-xl p-3 font-sans text-sm font-bold text-white placeholder:text-white/30 focus:outline-none focus:border-primary focus:bg-white/10 transition-colors" placeholder="in/username" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="font-sans font-bold text-sm uppercase text-white/70">GitHub</label>
+                        <input type="text" value={github} onChange={(e) => setGithub(e.target.value)} maxLength={25} className="bg-white/5 border border-white/20 rounded-xl p-3 font-sans text-sm font-bold text-white placeholder:text-white/30 focus:outline-none focus:border-primary focus:bg-white/10 transition-colors" placeholder="username" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="font-sans font-bold text-sm uppercase text-white/70">Email Address</label>
+                        <input type="text" value={email} onChange={(e) => setEmail(e.target.value)} maxLength={40} className="bg-white/5 border border-white/20 rounded-xl p-3 font-sans text-sm font-bold text-white placeholder:text-white/30 focus:outline-none focus:border-primary focus:bg-white/10 transition-colors" placeholder="builder@domain.com" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="font-sans font-bold text-sm uppercase text-white/70">Location</label>
+                        <input type="text" value={location} onChange={(e) => setLocation(e.target.value)} maxLength={35} className="bg-white/5 border border-white/20 rounded-xl p-3 font-sans text-sm font-bold text-white placeholder:text-white/30 focus:outline-none focus:border-primary focus:bg-white/10 transition-colors" placeholder="Bengaluru, India" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="font-sans font-bold text-sm uppercase text-white/70">Tech Stack</label>
+                        <input type="text" value={techStack} onChange={(e) => setTechStack(e.target.value)} maxLength={45} className="bg-white/5 border border-white/20 rounded-xl p-3 font-sans text-sm font-bold text-white placeholder:text-white/30 focus:outline-none focus:border-primary focus:bg-white/10 transition-colors" placeholder="Next.js, Rust, Solidity" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="font-sans font-bold text-sm uppercase text-white/70">Builder Class</label>
+                        <input type="text" value={builderClass} onChange={(e) => setBuilderClass(e.target.value)} maxLength={25} className="bg-white/5 border border-white/20 rounded-xl p-3 font-sans text-sm font-bold text-white placeholder:text-white/30 focus:outline-none focus:border-primary focus:bg-white/10 transition-colors" placeholder="Rust Rustler" />
+                      </div>
+                      <div className="flex flex-col gap-2">
+                        <label className="font-sans font-bold text-sm uppercase text-white/70">Unique Pass ID</label>
+                        <input type="text" value={passId} onChange={(e) => setPassId(e.target.value)} maxLength={25} className="bg-white/5 border border-white/20 rounded-xl p-3 font-sans text-sm font-bold text-white placeholder:text-white/30 focus:outline-none focus:border-primary focus:bg-white/10 transition-colors" placeholder="HH26-XXX" />
                       </div>
                     </div>
                     {role.trim() && (
@@ -355,7 +429,8 @@ export default function Home() {
                   onGenerate={(url) => {
                     setPfpConfig({...pfpConfig, aiOverlayUrl: url || undefined});
                     setBuilderConfig({...builderConfig, aiOverlayUrl: url || undefined});
-                    setPassConfig({...passConfig, aiOverlayUrl: url || undefined});
+                    setBoardingPassConfig({...boardingPassConfig, aiOverlayUrl: url || undefined});
+                    setEditorialConfig({...editorialConfig, aiOverlayUrl: url || undefined});
                   }}
                 />
 

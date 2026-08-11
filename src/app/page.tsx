@@ -25,26 +25,20 @@ export default function Home() {
       <div className="w-full max-w-4xl flex flex-col gap-12 mt-8">
         
         {/* Header */}
-        <div className="flex flex-col items-center w-full mb-4">
-          <div className="relative text-center w-full flex justify-center items-center py-8">
-            <h1 className="font-bodoni text-[10vw] md:text-[120px] font-bold text-primary tracking-tighter leading-none whitespace-nowrap drop-shadow-[5px_0px_0_rgba(0,0,0,1)]" style={{ transform: "scaleY(1.4) scaleX(0.95)" }}>
+        <div className="flex flex-col items-center w-max max-w-full mx-auto mb-4">
+          <div className="relative text-center w-full flex justify-center items-center pt-8 pb-4">
+            <h1 className="font-bodoni text-[11vw] md:text-[120px] font-bold text-primary tracking-tighter leading-none whitespace-nowrap drop-shadow-[5px_0px_0_rgba(0,0,0,1)]" style={{ transform: "scaleY(1.4)" }}>
               HACKER<span className="opacity-0 px-0 md:px-1"> </span>HOUSE
             </h1>
             <div className="absolute left-1/2 top-1/2 animate-oscillate z-7">
-              <span className="font-hindi text-primary text-2xl md:text-6xl tracking-wider pt-2" style={{ WebkitTextStroke: "6px var(--color-secondary)", paintOrder: "stroke fill" }}>
+              <span className="font-hindi text-primary text-2xl md:text-6xl tracking-wider pt-2 goa-stroke">
                 गोवा
               </span>
             </div>
           </div>
-          <div className="flex justify-between w-full text-primary font-space text-xs md:text-sm px-2 uppercase font-bold tracking-widest mt-4">
-            <span>GOA, INDIA &bull; 28 - 31 OCT 2026</span>
-            <span>2:47 PM STUDIO</span>
-          </div>
-        </div>
-
-        <div className="flex justify-center w-full mb-8">
-          <div className="px-4 py-2 bg-tertiary text-black brutal-border brutal-shadow-pink font-sans font-bold uppercase text-sm">
-            Ready to Launch 🚀
+          <div className="flex justify-between w-full text-primary font-space text-[9px] md:text-sm uppercase font-bold tracking-widest mt-4 md:mt-8 px-1">
+            <span className="text-left">GOA, INDIA &bull; 28 - 31 OCT 2026</span>
+            <span className="text-right">2:47 PM STUDIO</span>
           </div>
         </div>
 

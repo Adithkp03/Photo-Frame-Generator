@@ -47,6 +47,17 @@ body {
   border: 2px dashed #000000;
 }
 
+.goa-stroke {
+  -webkit-text-stroke: 6px var(--color-secondary);
+  paint-order: stroke fill;
+}
+
+@media (min-width: 768px) {
+  .goa-stroke {
+    -webkit-text-stroke: 10px var(--color-secondary);
+  }
+}
+
 @keyframes oscillate {
   0%, 100% {
     transform: translate(-50%, -50%) translateY(0);

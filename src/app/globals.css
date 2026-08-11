@@ -21,6 +21,9 @@
   --font-serif: var(--font-caslon), serif;
   --font-sans: var(--font-hanken), sans-serif;
   --font-mono: var(--font-jetbrains), monospace;
+  --font-bodoni: var(--font-bodoni), serif;
+  --font-hindi: var(--font-kalam), sans-serif;
+  --font-space: var(--font-space), monospace;
 }
 
 body {
@@ -42,4 +45,17 @@ body {
 
 .brutal-dashed {
   border: 2px dashed #000000;
+}
+
+@keyframes oscillate {
+  0%, 100% {
+    transform: translate(-50%, -50%) translateY(0);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(-15px);
+  }
+}
+
+.animate-oscillate {
+  animation: oscillate 3s infinite ease-in-out;
 }

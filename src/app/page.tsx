@@ -15,25 +15,36 @@ export default function Home() {
     setFile(uploadedFile);
   };
 
+  const handleReset = () => {
+    setImageUrl(null);
+    setFile(null);
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center p-6 md:p-12 bg-background text-on-surface">
       <div className="w-full max-w-4xl flex flex-col gap-12 mt-8">
         
         {/* Header */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <img src="/branding/logo.png" alt="HH Goa" className="w-16 h-16 brutal-border object-contain bg-white" />
-            <div>
-              <h1 className="font-serif text-4xl md:text-5xl font-bold text-primary tracking-tighter uppercase leading-none">
-                HH GOA 2026
-              </h1>
-              <p className="font-mono text-secondary uppercase font-bold mt-1 text-sm tracking-widest">
-                Identity Generator
-              </p>
+        <div className="flex flex-col items-center w-full mb-4">
+          <div className="relative text-center w-full flex justify-center items-center py-8">
+            <h1 className="font-bodoni text-[10vw] md:text-[120px] font-bold text-primary tracking-tighter leading-none whitespace-nowrap drop-shadow-[5px_0px_0_rgba(0,0,0,1)]" style={{ transform: "scaleY(1.4) scaleX(0.95)" }}>
+              HACKER<span className="opacity-0 px-0 md:px-1"> </span>HOUSE
+            </h1>
+            <div className="absolute left-1/2 top-1/2 animate-oscillate z-7">
+              <span className="font-hindi text-primary text-2xl md:text-6xl tracking-wider pt-2" style={{ WebkitTextStroke: "6px var(--color-secondary)", paintOrder: "stroke fill" }}>
+                गोवा
+              </span>
             </div>
           </div>
+          <div className="flex justify-between w-full text-primary font-space text-xs md:text-sm px-2 uppercase font-bold tracking-widest mt-4">
+            <span>GOA, INDIA &bull; 28 - 31 OCT 2026</span>
+            <span>2:47 PM STUDIO</span>
+          </div>
+        </div>
+
+        <div className="flex justify-center w-full mb-8">
           <div className="px-4 py-2 bg-tertiary text-black brutal-border brutal-shadow-pink font-sans font-bold uppercase text-sm">
-            Phase 3: Upload Engine
+            Ready to Launch 🚀
           </div>
         </div>
 
@@ -54,22 +65,22 @@ export default function Home() {
               <div className="w-full flex items-center justify-center gap-4 border-b-4 border-black pb-4">
                 <button 
                   onClick={() => setActiveFormat("A")}
-                  className={`px-6 py-2 font-sans font-bold uppercase brutal-border transition-transform ${activeFormat === "A" ? "bg-primary text-black brutal-shadow-pink hover:-translate-y-1" : "bg-surface text-on-surface hover:bg-[#1a854d]"}`}
+                  className={`px-6 py-2 font-sans font-bold uppercase brutal-border transition-all ${activeFormat === "A" ? "bg-primary text-black brutal-shadow-pink hover:-translate-y-1 active:translate-y-0 active:translate-x-0 active:shadow-none" : "bg-surface text-on-surface hover:bg-[#1a854d]"}`}
                 >
                   Format A: PFP
                 </button>
                 <button 
                   onClick={() => setActiveFormat("B")}
-                  className={`px-6 py-2 font-sans font-bold uppercase brutal-border transition-transform ${activeFormat === "B" ? "bg-primary text-black brutal-shadow-pink hover:-translate-y-1" : "bg-surface text-on-surface hover:bg-[#1a854d]"}`}
+                  className={`px-6 py-2 font-sans font-bold uppercase brutal-border transition-all ${activeFormat === "B" ? "bg-primary text-black brutal-shadow-pink hover:-translate-y-1 active:translate-y-0 active:translate-x-0 active:shadow-none" : "bg-surface text-on-surface hover:bg-[#1a854d]"}`}
                 >
                   Format B: Builder ID
                 </button>
               </div>
               
               {activeFormat === "A" ? (
-                <PFPPreview imageUrl={imageUrl} />
+                <PFPPreview imageUrl={imageUrl} onReset={handleReset} />
               ) : (
-                <BuilderPreview imageUrl={imageUrl} />
+                <BuilderPreview imageUrl={imageUrl} onReset={handleReset} />
               )}
             </div>
           )}

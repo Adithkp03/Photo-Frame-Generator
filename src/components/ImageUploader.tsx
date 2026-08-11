@@ -90,14 +90,14 @@ export default function ImageUploader({ onImageReady, currentImageUrl }: ImageUp
         ) : currentImageUrl ? (
           <>
             <img src={currentImageUrl} alt="Preview" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity hover:mix-blend-normal transition-all" />
-            <div className="relative z-10 bg-secondary text-black p-3 brutal-border brutal-shadow-yellow flex items-center gap-2 hover:-translate-y-1 hover:-translate-x-1 transition-transform">
+            <div className="relative z-10 bg-secondary text-black p-3 brutal-border brutal-shadow-yellow flex items-center gap-2 hover:-translate-y-1 hover:-translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-none transition-all">
               <ImageIcon className="w-5 h-5" />
               <span className="font-sans font-bold uppercase tracking-wider">Change Photo</span>
             </div>
           </>
         ) : (
           <div className="flex flex-col items-center gap-4 z-10">
-            <div className="bg-primary text-black p-4 brutal-border brutal-shadow-pink hover:-translate-y-1 hover:-translate-x-1 transition-transform">
+            <div className="bg-primary text-black p-4 brutal-border brutal-shadow-pink hover:-translate-y-1 hover:-translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-none transition-all">
               <Upload className="w-8 h-8" />
             </div>
             <div>

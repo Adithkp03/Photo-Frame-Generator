@@ -66,8 +66,16 @@ export async function renderBuilderID(
   ctx.strokeText(builderTitle.toUpperCase(), PADDING, 1020);
 
   // 4. Name and Role
-  drawText(ctx, name.toUpperCase(), PADDING, 1140, "bold 64px 'JetBrains Mono', monospace", WHITE, "left", "alphabetic");
-  drawText(ctx, role.toUpperCase(), PADDING, 1200, "bold 44px 'JetBrains Mono', monospace", PRIMARY, "left", "alphabetic");
+  let nameFontSize = 64;
+  if (name.length > 18) nameFontSize = 52;
+  if (name.length > 22) nameFontSize = 46;
+
+  let roleFontSize = 44;
+  if (role.length > 25) roleFontSize = 36;
+  if (role.length > 35) roleFontSize = 30;
+
+  drawText(ctx, name.toUpperCase(), PADDING, 1140, `bold ${nameFontSize}px 'JetBrains Mono', monospace`, WHITE, "left", "alphabetic");
+  drawText(ctx, role.toUpperCase(), PADDING, 1200, `bold ${roleFontSize}px 'JetBrains Mono', monospace`, PRIMARY, "left", "alphabetic");
 
   // 5. Event Metadata and Hashtag
   drawText(ctx, "#FrameInGoa", WIDTH - PADDING, 1280, "bold 40px 'JetBrains Mono', monospace", WHITE, "right", "alphabetic");

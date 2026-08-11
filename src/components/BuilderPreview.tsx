@@ -2,10 +2,11 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { renderBuilderID } from "@/lib/templates/builder";
-import { Loader2, Download } from "lucide-react";
+import { Loader2, Download, Share2, RotateCcw } from "lucide-react";
 
 interface BuilderPreviewProps {
   imageUrl: string;
+  onReset: () => void;
 }
 
 const generateBuilderTitle = (role: string) => {
@@ -20,7 +21,7 @@ const generateBuilderTitle = (role: string) => {
   return "THE MAKER";
 };
 
-export default function BuilderPreview({ imageUrl }: BuilderPreviewProps) {
+export default function BuilderPreview({ imageUrl, onReset }: BuilderPreviewProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [blob, setBlob] = useState<Blob | null>(null);
   const [isRendering, setIsRendering] = useState(false);
@@ -73,6 +74,31 @@ export default function BuilderPreview({ imageUrl }: BuilderPreviewProps) {
     URL.revokeObjectURL(url);
   };
 
+  const handleShare = async () => {
+    if (!blob) return;
+
+    const file = new File([blob], "HH-Goa-2026-Builder-ID.png", { type: "image/png" });
+    const shareData = {
+      title: "HH Goa 2026 Builder ID",
+      text: "Built my HH Goa 2026 builder card. #FrameInGoa",
+      files: [file],
+    };
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error("Error sharing:", err);
+      }
+    } else {
+      // Fallback: download the file and open twitter intent
+      handleDownload();
+      const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent("Built my HH Goa 2026 builder card. #FrameInGoa")}`;
+      window.open(twitterUrl, "_blank");
+      alert("Image downloaded! You can now attach it to your post on X.");
+    }
+  };
+
   // When switching formats, if not generated yet, don't show canvas
   return (
     <div className="w-full flex flex-col items-center gap-6">
@@ -108,7 +134,7 @@ export default function BuilderPreview({ imageUrl }: BuilderPreviewProps) {
 
           <button 
             onClick={generate}
-            className="w-full bg-primary text-black py-4 font-sans font-bold uppercase tracking-widest brutal-border hover:bg-secondary hover:text-white transition-colors"
+            className="w-full bg-primary text-black py-4 font-sans font-bold uppercase tracking-widest brutal-border brutal-shadow-pink hover:-translate-y-1 hover:-translate-x-1 hover:bg-secondary hover:text-white active:translate-y-0 active:translate-x-0 active:shadow-none transition-all"
           >
             Generate Builder ID
           </button>
@@ -130,20 +156,35 @@ export default function BuilderPreview({ imageUrl }: BuilderPreviewProps) {
           
           {error && <p className="text-secondary bg-black p-2 font-bold font-mono">{error}</p>}
 
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row flex-wrap gap-4 w-full">
+            <button 
+              onClick={onReset}
+              className="flex items-center justify-center gap-2 bg-surface text-on-surface px-6 py-4 font-sans font-bold uppercase tracking-wider brutal-border hover:bg-[#1a854d] transition-colors"
+            >
+              <RotateCcw className="w-5 h-5" />
+              Start Over
+            </button>
             <button 
               onClick={() => setIsGenerated(false)}
-              className="bg-white text-black px-6 py-4 font-sans font-bold uppercase tracking-wider brutal-border hover:bg-gray-200 transition-colors"
+              className="flex items-center justify-center gap-2 bg-white text-black px-6 py-4 font-sans font-bold uppercase tracking-wider brutal-border hover:bg-gray-200 transition-colors"
             >
               Edit
             </button>
             <button 
               onClick={handleDownload}
               disabled={isRendering || !blob}
-              className="flex items-center gap-2 bg-primary text-black px-8 py-4 font-sans font-bold text-xl uppercase tracking-wider brutal-border brutal-shadow-pink hover:-translate-y-1 hover:-translate-x-1 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center justify-center gap-2 bg-white text-black px-6 py-4 font-sans font-bold uppercase tracking-wider brutal-border hover:bg-gray-200 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Download className="w-6 h-6" />
+              <Download className="w-5 h-5" />
               Download
+            </button>
+            <button 
+              onClick={handleShare}
+              disabled={isRendering || !blob}
+              className="flex-1 flex items-center justify-center gap-2 bg-primary text-black px-6 py-4 font-sans font-bold uppercase tracking-wider brutal-border brutal-shadow-pink hover:-translate-y-1 hover:-translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Share2 className="w-5 h-5" />
+              Share
             </button>
           </div>
         </>

@@ -20,19 +20,12 @@ const BUILDER_TEMPLATES = [
   { id: "TERMINAL", title: "TERMINAL", subtitle: "Cyberpunk", icon: <div className="w-6 h-8 bg-black border-2 border-green-500"><div className="w-full h-1 bg-green-500 mt-1"></div></div> },
 ];
 
-const PASS_STYLES = [
-  { id: "CLASSIC", title: "CLASSIC", subtitle: "Standard", icon: <div className="w-10 h-4 border-2 border-primary border-dashed bg-transparent"></div> },
-  { id: "TERMINAL", title: "TERMINAL", subtitle: "Dark Mode", icon: <div className="w-10 h-4 bg-black border border-green-500"></div> },
-  { id: "AIRLINE", title: "AIRLINE", subtitle: "Flight", icon: <div className="w-10 h-4 bg-green-900 border border-primary"></div> },
-  { id: "DEPARTURE", title: "DEPARTURE", subtitle: "Photo Heavy", icon: <div className="w-10 h-4 bg-white/20"></div> },
-  { id: "EXPRESS", title: "EXPRESS", subtitle: "Hot Pink", icon: <div className="w-10 h-4 bg-secondary"></div> },
-];
+
 
 export default function StyleSelector({ type, activeStyle, onSelect }: StyleSelectorProps) {
-  let options;
-  if (type === "PFP") options = PFP_STYLES;
-  else if (type === "BUILDER") options = BUILDER_TEMPLATES;
-  else options = PASS_STYLES;
+  if (type === "PASS") return null;
+
+  const options = type === "PFP" ? PFP_STYLES : type === "BUILDER" ? BUILDER_TEMPLATES : [];
 
   return (
     <div className="flex flex-col gap-3">

@@ -21,7 +21,7 @@ interface Props {
   builderConfig: BuilderConfig;
   passConfig: BoardingPassConfig;
   onReset: () => void;
-  onEdit: () => void;
+  onEditFormat: (format: "PFP" | "BUILDER" | "PASS") => void;
 }
 
 const blobToBase64 = (b: Blob): Promise<string> => {
@@ -179,17 +179,20 @@ export default function IdentityPackPreview(props: Props) {
       </div>
 
       <div className="flex flex-col md:flex-row gap-6 w-full justify-center items-center md:items-start max-w-6xl mx-auto px-4">
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-sm flex flex-col items-center">
            <p className="font-mono text-primary font-bold uppercase tracking-widest text-sm text-center mb-4">PFP / X IDENTITY</p>
            <PFPPreview {...props} config={props.pfpConfig} showActions={false} />
+           <button onClick={() => props.onEditFormat("PFP")} className="mt-4 bg-white/10 text-white px-4 py-2 rounded-lg border border-white/20 font-sans font-bold text-xs uppercase hover:bg-white/20 transition-colors">Edit PFP</button>
         </div>
-        <div className="w-full max-w-sm">
+        <div className="w-full max-w-sm flex flex-col items-center">
            <p className="font-mono text-primary font-bold uppercase tracking-widest text-sm text-center mb-4">BUILDER IDENTITY</p>
            <BuilderPreview {...props} config={props.builderConfig} showActions={false} />
+           <button onClick={() => props.onEditFormat("BUILDER")} className="mt-4 bg-white/10 text-white px-4 py-2 rounded-lg border border-white/20 font-sans font-bold text-xs uppercase hover:bg-white/20 transition-colors">Edit Builder ID</button>
         </div>
-        <div className="w-full max-w-sm">
-           <p className="font-mono text-primary font-bold uppercase tracking-widest text-sm text-center mb-4">BOARDING PASS</p>
+        <div className="w-full max-w-sm flex flex-col items-center">
+           <p className="font-mono text-primary font-bold uppercase tracking-widest text-sm text-center mb-4">ENTRY PASS</p>
            <BoardingPassPreview {...props} config={props.passConfig} showActions={false} />
+           <button onClick={() => props.onEditFormat("PASS")} className="mt-4 bg-white/10 text-white px-4 py-2 rounded-lg border border-white/20 font-sans font-bold text-xs uppercase hover:bg-white/20 transition-colors">Edit Entry Pass</button>
         </div>
       </div>
 
@@ -205,12 +208,7 @@ export default function IdentityPackPreview(props: Props) {
           <RotateCcw className="w-4 h-4" />
           Start Over
         </button>
-        <button 
-          onClick={props.onEdit}
-          className="flex-1 flex items-center justify-center gap-2 bg-white/10 text-white px-6 py-4 rounded-xl border border-white/20 font-sans font-bold text-sm uppercase tracking-wider hover:bg-white/20 hover:-translate-y-0.5 transition-all"
-        >
-          Edit Identity
-        </button>
+
         <button 
           onClick={handleDownloadAll}
           disabled={!pfpBlob || !builderBlob || !passBlob || isSharing}

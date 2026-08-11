@@ -301,7 +301,7 @@ export default function Home() {
                      builderConfig={mergedBuilderConfig} 
                      passConfig={boardingPassConfig}
                      onReset={handleStartOver} 
-                     onEdit={() => setActiveFormat("PFP")}
+                     onEditFormat={(fmt) => setActiveFormat(fmt)}
                   />
                 </div>
               )}

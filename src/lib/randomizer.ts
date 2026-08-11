@@ -43,11 +43,10 @@ const CURATED_BUILDER_COMBOS: BuilderCombo[] = [
 ];
 
 const CURATED_PASS_COMBOS: PassCombo[] = [
-  { style: "CLASSIC", look: "PUNCH" },
-  { style: "TERMINAL", look: "GRAIN" },
-  { style: "AIRLINE", look: "AS_SHOT" },
-  { style: "DEPARTURE", look: "DUOTONE" },
-  { style: "EXPRESS", look: "PUNCH" },
+  { style: "PREMIUM", look: "PUNCH" },
+  { style: "PREMIUM", look: "GRAIN" },
+  { style: "PREMIUM", look: "AS_SHOT" },
+  { style: "PREMIUM", look: "DUOTONE" },
 ];
 
 const CURATED_EDITORIAL_COMBOS: EditorialCombo[] = [

@@ -35,12 +35,9 @@ export async function renderBuilderID(
   if (config.template === "TERMINAL" || config.template === "EDITORIAL_ID") {
     ctx.fillStyle = "#050505";
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
-  } else if (config.template === "FIELD_PASS") {
-    ctx.fillStyle = "#003B25";
-    ctx.fillRect(0, 0, WIDTH, HEIGHT);
   }
 
-  const isDark = ["TERMINAL", "EDITORIAL_ID", "FIELD_PASS"].includes(config.template);
+  const isDark = ["TERMINAL", "EDITORIAL_ID"].includes(config.template);
   const textColor = isDark ? "#F5F1E6" : "#050505";
   const accentColor = isDark ? "#FFE500" : "#FF0085";
 
@@ -86,23 +83,38 @@ export async function renderBuilderID(
     await drawPhoto(px, py, pw, ph);
     ctx.strokeStyle = textColor; ctx.lineWidth = 4; ctx.strokeRect(px, py, pw, ph);
 
-    // Metadata Right Side
-    const mx = 560;
-    let my = 260;
-    const drawField = (label: string, value: string) => {
-      drawText(ctx, label, mx, my, `bold 16px ${monoFont}`, accentColor, "left");
-      drawText(ctx, (value || "UNKNOWN").toUpperCase(), mx, my + 30, `bold 28px ${sansFont}`, textColor, "left");
-      my += 80;
+    // Under the Photo
+    const drawUnder = (label: string, value: string | undefined, x: number, y: number) => {
+      drawText(ctx, label, x, y, `bold 14px ${monoFont}`, accentColor, "left");
+      let displayValue = (value || "N/A").toUpperCase();
+      if (displayValue.length > 18) displayValue = displayValue.substring(0, 16) + "...";
+      drawText(ctx, displayValue, x, y + 25, `bold 22px ${sansFont}`, textColor, "left");
     };
     
-    drawField("PASSENGER / BUILDER", name);
-    drawField("PRIMARY ROLE", role);
-    drawField("DESTINATION", "GOA / INDIA");
-    drawField("BUILDER ID", `HHG-${Math.floor(Math.random()*9000)+1000}`);
-    drawField("ACCESS LEVEL", "ALL AREAS");
+    drawUnder("PASSENGER / BUILDER", name, 60, 870);
+    drawUnder("BUILDER ID", config.passId, 320, 870);
+    drawUnder("PRIMARY ROLE", role, 60, 950);
 
     // Giant Title
-    drawText(ctx, (title || "BUILDER").toUpperCase(), 60, 1000, `400 130px ${displayFont}`, textColor, "left");
+    drawText(ctx, (title || "BUILDER").toUpperCase(), 60, 1100, `400 130px ${displayFont}`, textColor, "left");
+
+    // Other Details to the Right of the Photo
+    let ry = 260;
+    const drawRight = (label: string, value: string | undefined) => {
+      drawText(ctx, label, 560, ry, `bold 14px ${monoFont}`, accentColor, "left");
+      let displayValue = (value || "N/A").toUpperCase();
+      if (displayValue.length > 25) displayValue = displayValue.substring(0, 23) + "...";
+      drawText(ctx, displayValue, 560, ry + 30, `bold 28px ${sansFont}`, textColor, "left");
+      ry += 80;
+    };
+    
+    drawRight("BUILDER CLASS", config.builderClass);
+    drawRight("TECH STACK", config.techStack);
+    drawRight("LOCATION", config.location);
+    drawRight("TWITTER / X", config.xHandle);
+    drawRight("GITHUB", config.github);
+    drawRight("LINKEDIN", config.linkedin);
+    drawRight("EMAIL", config.email);
     
     // Bottom Bar
     ctx.fillStyle = textColor;
@@ -112,105 +124,69 @@ export async function renderBuilderID(
     drawText(ctx, "NON-TRANSFERABLE", WIDTH - 60, 1220, `bold 18px ${monoFont}`, textColor, "right");
     drawText(ctx, "VALID OCT 28-31", WIDTH - 60, 1240, `bold 18px ${monoFont}`, accentColor, "right");
 
-  } else if (config.template === "PASSPORT") {
-    // ---------------------------------------------------------
-    // PASSPORT: Travel document aesthetic, stamps
-    // ---------------------------------------------------------
-    drawGrid(ctx, WIDTH, HEIGHT, 100, "rgba(0, 92, 54, 0.1)");
-    
-    // Top layout
-    ctx.fillStyle = "#005C36";
-    ctx.fillRect(0, 0, WIDTH, 160);
-    drawText(ctx, "REPUBLIC OF BUILDERS", WIDTH/2, 80, `400 48px ${displayFont}`, "#F5F1E6", "center");
-    drawText(ctx, "OFFICIAL PASSPORT ENTRY", WIDTH/2, 120, `400 32px ${displayFont}`, "#F5F1E6", "center");
-
-    // Left photo
-    const px = 80, py = 240, pw = 360, ph = 480;
-    await drawPhoto(px, py, pw, ph);
-    drawCropMarks(ctx, px, py, 20, "#005C36", 3);
-    drawCropMarks(ctx, px+pw, py+ph, 20, "#005C36", 3);
-
-    // Right details
-    const mx = 480;
-    let my = 220;
-    const drawPField = (label: string, value: string | undefined, xOffset: number = 0) => {
-      drawText(ctx, label, mx + xOffset, my, `bold 12px ${monoFont}`, "#005C36", "left");
-      // Truncate long values so they don't overlap
-      let displayValue = (value || "N/A").toUpperCase();
-      if (displayValue.length > 20 && xOffset > 0) displayValue = displayValue.substring(0, 18) + "...";
-      drawText(ctx, displayValue, mx + xOffset, my + 20, `bold 18px ${monoFont}`, "#050505", "left");
-    };
-    
-    drawPField("SURNAME, GIVEN NAMES", name);
-    my += 50;
-    drawPField("PROFESSION / STACK", role);
-    my += 50;
-    drawPField("DESIGNATION", title);
-    my += 50;
-    drawPField("TECH STACK", config.techStack);
-    my += 50;
-    drawPField("LOCATION", config.location);
-    drawPField("BUILDER CLASS", config.builderClass, 280);
-    my += 50;
-    drawPField("TWITTER / X", config.xHandle);
-    drawPField("GITHUB", config.github, 280);
-    my += 50;
-    drawPField("EMAIL", config.email);
-    drawPField("LINKEDIN", config.linkedin, 280);
-    my += 50;
-    drawPField("DATE OF ARRIVAL", "28 OCT 2026");
-    drawPField("PASS ID", config.passId, 280);
-
-    // Machine readable zone
-    ctx.fillStyle = "#F5F1E6";
-    ctx.fillRect(0, HEIGHT - 180, WIDTH, 180);
-    const mrz = `P<HHG${(name || 'BUILDER').replace(/\s+/g, '<').substring(0,25)}<<<<<<<<<<<<<<<<<<<\n0123456789IND2810260M3110260<<<<<<<<<<<<<<04`;
-    const lines = mrz.split('\n');
-    drawText(ctx, lines[0], 60, HEIGHT - 120, `bold 32px ${monoFont}`, "#050505", "left");
-    drawText(ctx, lines[1], 60, HEIGHT - 60, `bold 32px ${monoFont}`, "#050505", "left");
-
   } else if (config.template === "EDITORIAL_ID") {
     // ---------------------------------------------------------
-    // EDITORIAL_ID: Huge type, photo overlap, brutalist editorial
+    // EDITORIAL_ID: Simple overlay with the photo as the background
     // ---------------------------------------------------------
-    // Giant background text
-    ctx.save();
-    ctx.translate(100, HEIGHT - 200);
-    ctx.rotate(-Math.PI / 2);
-    drawText(ctx, "HACKER HOUSE", 0, 0, `400 240px ${displayFont}`, "rgba(255,255,255,0.05)", "left");
-    drawText(ctx, "GOA 2026", 0, 180, `400 240px ${displayFont}`, "rgba(255,255,255,0.05)", "left");
-    ctx.restore();
+    await drawPhoto(0, 0, WIDTH, HEIGHT);
+    
+    // Create a dark gradient overlay at the bottom for text legibility
+    const grad = ctx.createLinearGradient(0, HEIGHT - 700, 0, HEIGHT);
+    grad.addColorStop(0, "transparent");
+    grad.addColorStop(0.5, "rgba(0,0,0,0.7)");
+    grad.addColorStop(1, "rgba(0,0,0,0.95)");
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, WIDTH, HEIGHT);
+    
+    // Overlay border
+    ctx.strokeStyle = "rgba(255,255,255,0.1)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(40, 40, WIDTH - 80, HEIGHT - 80);
 
-    // Photo centered, oversized
-    const pw = 800, ph = 600;
-    const px = (WIDTH - pw) / 2, py = 200;
+    const txtColor = "#FFFFFF";
+    const highlight = "#FFE500";
     
-    ctx.fillStyle = accentColor;
-    ctx.fillRect(px + 20, py + 20, pw, ph);
-    await drawPhoto(px, py, pw, ph);
+    // Top logos
+    drawText(ctx, "HH GOA 2026", 80, 100, `bold 24px ${monoFont}`, txtColor, "left");
+    drawBarcode(ctx, WIDTH - 280, 70, 200, 40, txtColor);
+
+    // Giant name
+    drawText(ctx, (name || "BUILDER").toUpperCase(), 80, HEIGHT - 380, `400 140px ${displayFont}`, txtColor, "left");
+    drawText(ctx, (title || "ROLE").toUpperCase(), 80, HEIGHT - 320, `400 60px ${displayFont}`, highlight, "left");
+
+    // Grid of metadata below name
+    const sx1 = 80;
+    const sx2 = 340;
+    const sx3 = 600;
+    const sx4 = 860;
     
-    // Overlapping typography
-    drawText(ctx, (name || "BUILDER").toUpperCase(), WIDTH/2, py + ph + 80, `400 120px ${displayFont}`, accentColor, "center");
-    drawText(ctx, (title || "ROLE").toUpperCase(), WIDTH/2, py + ph + 160, `400 60px ${displayFont}`, textColor, "center");
+    const drawEd = (label: string, value: string | undefined, x: number, y: number) => {
+      drawText(ctx, label, x, y, `bold 14px ${monoFont}`, "rgba(255,255,255,0.5)", "left");
+      let displayValue = (value || "N/A").toUpperCase();
+      if (displayValue.length > 18) displayValue = displayValue.substring(0, 16) + "...";
+      drawText(ctx, displayValue, x, y + 25, `bold 18px ${sansFont}`, txtColor, "left");
+    };
+
+    let ey = HEIGHT - 240;
+    drawEd("ROLE / STACK", role, sx1, ey);
+    drawEd("TECH STACK", config.techStack, sx2, ey);
+    drawEd("BUILDER CLASS", config.builderClass, sx3, ey);
+    drawEd("PASS ID", config.passId, sx4, ey);
     
-    // Editorial metadata blocks
-    if (config.xHandle || config.location) {
-      drawText(ctx, (config.xHandle || config.location || "").toUpperCase(), 40, HEIGHT - 180, `bold 24px ${monoFont}`, textColor, "left");
-    }
-    if (config.techStack) {
-      drawText(ctx, (config.techStack || "").toUpperCase(), WIDTH - 40, HEIGHT - 180, `bold 24px ${monoFont}`, textColor, "right");
-    }
-    
-    drawBarcode(ctx, WIDTH/2 - 200, HEIGHT - 120, 400, 60, textColor);
-    
-  } else if (config.template === "TERMINAL") {
+    ey = HEIGHT - 160;
+    drawEd("LOCATION", config.location, sx1, ey);
+    drawEd("TWITTER / X", config.xHandle, sx2, ey);
+    drawEd("GITHUB", config.github, sx3, ey);
+    drawEd("LINKEDIN", config.linkedin, sx4, ey);
+
+  } else {
     // ---------------------------------------------------------
     // TERMINAL: Hacker/Cyberpunk aesthetic, green/yellow on black
     // ---------------------------------------------------------
     drawGrid(ctx, WIDTH, HEIGHT, 40, "rgba(0, 92, 54, 0.3)");
     
     drawText(ctx, "> _INITIALIZING BUILDER PROTOCOL...", 40, 80, `bold 18px ${monoFont}`, "#00FF41", "left");
-    drawText(ctx, "================================================", 40, 110, `bold 18px ${monoFont}`, "#00FF41", "left");
+    drawText(ctx, "==========================================================================", 40, 110, `bold 18px ${monoFont}`, "#00FF41", "left");
     
     const pw = 400, ph = 400;
     const px = 40, py = 160;
@@ -223,48 +199,45 @@ export async function renderBuilderID(
       ctx.fillStyle = "rgba(0,0,0,0.3)";
       ctx.fillRect(px, py+i, pw, 2);
     }
+    ctx.strokeStyle = "#00FF41"; ctx.lineWidth = 2; ctx.strokeRect(px, py, pw, ph);
     
-    const mx = 480;
-    let my = 180;
-    const drawTField = (label: string, value: string) => {
-      drawText(ctx, `> ${label}:`, mx, my, `bold 18px ${monoFont}`, "#00FF41", "left");
-      drawText(ctx, (value || "N/A").toUpperCase(), mx, my + 30, `bold 24px ${monoFont}`, accentColor, "left");
-      my += 70;
+    const termColor = "#00FF41";
+    const termAccent = "#FFE500";
+
+    // Under the Photo
+    const drawTUnder = (label: string, value: string | undefined, x: number, y: number) => {
+      drawText(ctx, `> ${label}:`, x, y, `bold 16px ${monoFont}`, termColor, "left");
+      let displayValue = (value || "N/A").toUpperCase();
+      if (displayValue.length > 18) displayValue = displayValue.substring(0, 16) + "...";
+      drawText(ctx, displayValue, x, y + 25, `bold 22px ${monoFont}`, termAccent, "left");
     };
-    
-    drawTField("IDENTITY", name);
-    drawTField("CLASS", role);
-    drawTField("ALIAS", title);
-    drawTField("STATUS", "AUTHORIZED");
-    
-    drawText(ctx, "SYSTEM.READY", 40, HEIGHT - 80, `400 150px ${displayFont}`, "#00FF41", "left");
-    
-  } else {
-    // ---------------------------------------------------------
-    // FIELD_PASS: Utilitarian, heavy blocks, functional
-    // ---------------------------------------------------------
-    ctx.fillStyle = "#FFE500";
-    ctx.fillRect(40, 40, WIDTH - 80, HEIGHT - 80);
-    
-    const pw = 500, ph = 500;
-    const px = 80, py = 80;
-    
-    ctx.fillStyle = "#050505";
-    ctx.fillRect(px + 15, py + 15, pw, ph);
-    await drawPhoto(px, py, pw, ph);
-    
-    drawText(ctx, "FIELD PASS", WIDTH - 80, 140, `400 80px ${displayFont}`, "#050505", "right");
-    drawText(ctx, "HHG-26", WIDTH - 80, 200, `bold 24px ${monoFont}`, "#005C36", "right");
-    
-    drawText(ctx, (name || "BUILDER").toUpperCase(), 80, 700, `400 110px ${displayFont}`, "#050505", "left");
-    drawText(ctx, (title || "ROLE").toUpperCase(), 80, 780, `400 60px ${displayFont}`, "#005C36", "left");
-    drawText(ctx, (role || "ROLE").toUpperCase(), 80, 840, `bold 24px ${monoFont}`, "#050505", "left");
-    
-    ctx.fillStyle = "#050505";
-    ctx.fillRect(80, 950, WIDTH - 160, 4);
-    
-    drawBarcode(ctx, 80, 1000, 500, 100, "#050505");
-    drawText(ctx, "ACCESS: ALL", WIDTH - 80, 1050, `bold 32px ${monoFont}`, "#050505", "right");
+
+    drawTUnder("IDENTITY", name, 40, 620);
+    drawTUnder("PASS_ID", config.passId, 280, 620);
+    drawTUnder("SYS.ROLE", role, 40, 700);
+
+    drawText(ctx, (title || "SYSTEM.READY").toUpperCase(), 40, 1100, `400 130px ${displayFont}`, termColor, "left");
+
+    // Right of the Photo
+    let ry = 180;
+    const drawTRight = (label: string, value: string | undefined) => {
+      drawText(ctx, `> ${label}:`, 480, ry, `bold 16px ${monoFont}`, termColor, "left");
+      let displayValue = (value || "N/A").toUpperCase();
+      if (displayValue.length > 25) displayValue = displayValue.substring(0, 23) + "...";
+      drawText(ctx, displayValue, 480, ry + 25, `bold 24px ${monoFont}`, termAccent, "left");
+      ry += 70;
+    };
+
+    drawTRight("CLASS", config.builderClass);
+    drawTRight("STACK", config.techStack);
+    drawTRight("SYS.LOC", config.location);
+    drawTRight("X_HANDLE", config.xHandle);
+    drawTRight("GITHUB", config.github);
+    drawTRight("LINKEDIN", config.linkedin);
+    drawTRight("EMAIL", config.email);
+
+    drawText(ctx, `> STATUS: AUTHORIZED`, 480, ry + 20, `bold 20px ${monoFont}`, termColor, "left");
+    drawBarcode(ctx, WIDTH - 440, HEIGHT - 140, 400, 60, termColor);
   }
 
   // AI Overlay (Full Canvas)

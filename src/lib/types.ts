@@ -1,7 +1,7 @@
 export type PhotoLook = "AS_SHOT" | "PUNCH" | "DUOTONE" | "GRAIN";
 export type PFPStyle = "CORE" | "SIGNAL" | "SIGNAL_01" | "WILD" | "GRID";
 export type PFPRingColor = "GREEN" | "YELLOW" | "PINK" | "BLACK" | "WHITE";
-export type BuilderTemplate = "CREDENTIAL" | "PASSPORT" | "EDITORIAL_ID" | "TERMINAL" | "FIELD_PASS";
+export type BuilderTemplate = "CREDENTIAL" | "EDITORIAL_ID" | "TERMINAL";
 export type BoardingPassStyle = "CLASSIC" | "TERMINAL" | "AIRLINE" | "DEPARTURE" | "EXPRESS";
 export type EditorialStyle = "TYPOGRAPHIC" | "IMAGE_FIRST" | "BRUTALIST" | "SWISS" | "EXPERIMENTAL";
 export type Format = "PFP" | "BUILDER" | "PASS" | "PACK" | "EDITORIAL";

@@ -16,10 +16,8 @@ const PFP_STYLES = [
 
 const BUILDER_TEMPLATES = [
   { id: "CREDENTIAL", title: "CREDENTIAL", subtitle: "Official", icon: <div className="w-6 h-8 border-2 border-black bg-primary flex flex-col items-center justify-start p-1"><div className="w-full h-3 bg-black"></div></div> },
-  { id: "PASSPORT", title: "PASSPORT", subtitle: "Travel", icon: <div className="w-8 h-6 border-2 border-black border-dashed bg-white"></div> },
   { id: "EDITORIAL_ID", title: "EDITORIAL", subtitle: "Poster", icon: <div className="w-6 h-8 bg-black flex items-end p-1"><div className="w-full h-2 bg-primary"></div></div> },
   { id: "TERMINAL", title: "TERMINAL", subtitle: "Cyberpunk", icon: <div className="w-6 h-8 bg-black border-2 border-green-500"><div className="w-full h-1 bg-green-500 mt-1"></div></div> },
-  { id: "FIELD_PASS", title: "FIELD PASS", subtitle: "Functional", icon: <div className="w-6 h-8 bg-primary"><div className="w-4 h-4 bg-black m-1"></div></div> },
 ];
 
 const PASS_STYLES = [

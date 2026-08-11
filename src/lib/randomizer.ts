@@ -37,10 +37,8 @@ const CURATED_PFP_COMBOS: PFPCombo[] = [
 // Curated combinations for Builder
 const CURATED_BUILDER_COMBOS: BuilderCombo[] = [
   { template: "CREDENTIAL", look: "PUNCH" },
-  { template: "PASSPORT", look: "GRAIN" },
   { template: "EDITORIAL_ID", look: "DUOTONE" },
   { template: "TERMINAL", look: "AS_SHOT" },
-  { template: "FIELD_PASS", look: "DUOTONE" },
   { template: "CREDENTIAL", look: "AS_SHOT" },
 ];
 

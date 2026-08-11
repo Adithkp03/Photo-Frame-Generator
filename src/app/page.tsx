@@ -58,7 +58,7 @@ export default function Home() {
   const mergedBuilderConfig = useMemo(() => {
     return {
       ...builderConfig,
-      twitter,
+      xHandle: twitter,
       linkedin,
       github,
       email,

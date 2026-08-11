@@ -1,83 +1,81 @@
-"use client";
+import { useEffect, useRef, useState } from "react";
+import { renderBoardingPass, BoardingPassConfig } from "../lib/templates/boarding-pass";
+import { Loader2, Download, Share2, RotateCcw } from "lucide-react";
 
-import React, { useEffect, useRef, useState } from "react";
-import { renderPFP } from "@/lib/templates/pfp";
-import { Loader2, Download, Share2, RotateCcw, Shuffle } from "lucide-react";
-import { PFPConfig } from "@/lib/types";
-
-interface PFPPreviewProps {
+interface Props {
   imageUrl: string;
+  name: string;
+  role: string;
+  title: string;
+  builderNumber: string;
+  scale: number;
+  panX: number;
+  panY: number;
+  config: BoardingPassConfig;
   onReset: () => void;
-  onEdit?: () => void;
-  onRemix?: () => void;
-  scale?: number;
-  panX?: number;
-  panY?: number;
-  config: PFPConfig;
   showActions?: boolean;
-  onThumbnailRendered?: (dataUrl: string) => void;
 }
 
-export default function PFPPreview({ 
-  imageUrl, 
-  onReset,
-  onEdit,
-  onRemix,
-  scale = 1,
-  panX = 0,
-  panY = 0,
+export default function BoardingPassPreview({
+  imageUrl,
+  name,
+  role,
+  title,
+  builderNumber,
+  scale,
+  panX,
+  panY,
   config,
+  onReset,
   showActions = true,
-  onThumbnailRendered
-}: PFPPreviewProps) {
+}: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [blob, setBlob] = useState<Blob | null>(null);
-  const [isRendering, setIsRendering] = useState(false);
+  const [isRendering, setIsRendering] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function doGenerate() {
-      if (!canvasRef.current) return;
-      
-      setIsRendering(true);
-      setError(null);
-      
-      try {
-        const finalBlob = await renderPFP(canvasRef.current, imageUrl, "/branding/logo.png", scale, panX, panY, config);
-        setBlob(finalBlob);
-        
-        if (onThumbnailRendered) {
-          // Generate a low-res data url for history
-          const tinyCanvas = document.createElement("canvas");
-          tinyCanvas.width = 100;
-          tinyCanvas.height = 100;
-          const tCtx = tinyCanvas.getContext("2d");
-          if (tCtx) {
-            tCtx.drawImage(canvasRef.current, 0, 0, 100, 100);
-            onThumbnailRendered(tinyCanvas.toDataURL("image/png", 0.5));
-          }
-        }
-      } catch (err: any) {
-        setError("Failed to generate PFP.");
-        console.error(err);
-      } finally {
-        setIsRendering(false);
-      }
-    }
-
-    const timeout = setTimeout(doGenerate, 150); // slight debounce for sliders
-    return () => clearTimeout(timeout);
-  }, [imageUrl, scale, panX, panY, config]);
-
+  
   const [isSharing, setIsSharing] = useState(false);
   const [shareError, setShareError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+    
+    const render = async () => {
+      setIsRendering(true);
+      setError(null);
+      if (canvasRef.current) {
+        try {
+          const newBlob = await renderBoardingPass(
+            canvasRef.current,
+            imageUrl,
+            name,
+            role,
+            title,
+            builderNumber,
+            scale,
+            panX,
+            panY,
+            config
+          );
+          setBlob(newBlob);
+        } catch (err) {
+          console.error(err);
+          setError("Failed to render boarding pass.");
+        }
+      }
+      setIsRendering(false);
+    };
+
+    timeout = setTimeout(render, 100);
+    return () => clearTimeout(timeout);
+  }, [imageUrl, name, role, title, scale, panX, panY, config, builderNumber]);
 
   const handleDownload = () => {
     if (!blob) return;
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "HH-Goa-2026-PFP.png";
+    a.download = `HH-Goa-${name || "Builder"}-Pass.png`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -104,8 +102,8 @@ export default function PFPPreview({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           image: base64Image,
-          format: 'PFP',
-          metadata: { style: config.style, ring: config.ringColor }
+          format: 'PASS',
+          metadata: { name, role, title }
         }),
       });
       
@@ -115,7 +113,7 @@ export default function PFPPreview({
       const appUrl = window.location.origin;
       const shareUrl = `${appUrl}/share/${data.id}`;
       
-      const text = encodeURIComponent("Just built my HH Goa 2026 identity. #FrameInGoa\n\n");
+      const text = encodeURIComponent(`Got my HH Goa 2026 boarding pass.\n\n${title}\n#FrameInGoa\n\n`);
       window.open(`https://x.com/intent/post?text=${text}&url=${encodeURIComponent(shareUrl)}`, "_blank", "noopener,noreferrer");
     } catch (err) {
       console.error(err);
@@ -126,15 +124,15 @@ export default function PFPPreview({
   };
 
   return (
-    <div className="w-full flex flex-col items-center gap-6">
-      <div className="relative w-full max-w-md aspect-square bg-black/20 rounded-3xl border border-white/10 overflow-hidden shadow-xl p-4">
+    <div className="flex flex-col items-center gap-4 w-full">
+      <div className="relative w-full max-w-sm aspect-[4/5] bg-black/20 rounded-[2rem] border border-white/10 overflow-hidden shadow-xl p-4">
         <canvas 
           ref={canvasRef} 
           className="w-full h-full object-contain"
         />
         
         {isRendering && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md z-10 rounded-3xl">
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md z-10 rounded-[2rem]">
             <Loader2 className="w-12 h-12 animate-spin text-primary mb-3" />
             <span className="font-mono text-white font-bold uppercase tracking-widest text-sm">BUILDING...</span>
           </div>
@@ -150,7 +148,7 @@ export default function PFPPreview({
       )}
 
       {showActions && (
-        <div className="flex flex-col sm:flex-row gap-3 w-full justify-center mt-2">
+        <div className="flex flex-col sm:flex-row flex-wrap gap-3 w-full justify-center mt-2">
           <button 
             onClick={onReset}
             className="flex-1 flex items-center justify-center gap-2 bg-white/10 text-white px-4 py-3 rounded-xl border border-white/20 font-sans font-bold text-sm uppercase tracking-wider hover:bg-white/20 hover:border-white/40 hover:-translate-y-0.5 transition-all"
@@ -158,14 +156,7 @@ export default function PFPPreview({
             <RotateCcw className="w-4 h-4" />
             Reset
           </button>
-          {onEdit && (
-            <button 
-              onClick={onEdit}
-              className="flex-1 flex items-center justify-center gap-2 bg-white/10 text-white px-4 py-3 rounded-xl border border-white/20 font-sans font-bold text-sm uppercase tracking-wider hover:bg-white/20 hover:border-white/40 hover:-translate-y-0.5 transition-all"
-            >
-              Edit
-            </button>
-          )}
+          
           <button 
             onClick={handleDownload}
             disabled={isRendering || !blob || isSharing}
@@ -174,6 +165,7 @@ export default function PFPPreview({
             <Download className="w-4 h-4" />
             Save
           </button>
+          
           <button 
             onClick={handleShare}
             disabled={isRendering || !blob || isSharing}

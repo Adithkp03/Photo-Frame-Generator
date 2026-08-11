@@ -62,15 +62,16 @@ export default function ImageUploader({ onImageReady, currentImageUrl }: ImageUp
   return (
     <div className="w-full flex flex-col gap-4">
       <div 
-        className={`relative w-full h-72 brutal-border transition-all flex flex-col items-center justify-center p-4 text-center cursor-pointer overflow-hidden
-          ${isDragging ? "bg-primary text-black translate-x-1 -translate-y-1 brutal-shadow-yellow" : "bg-surface text-on-surface"}
-        `}
+        className={`group relative w-full aspect-square md:aspect-video rounded-[2rem] border border-white/20 flex flex-col items-center justify-center p-8 text-center transition-all cursor-pointer overflow-hidden shadow-2xl ${
+          isDragging 
+            ? "bg-white/20 backdrop-blur-xl text-white border-primary shadow-[0_0_40px_rgba(243,231,0,0.3)] scale-[1.02]" 
+            : "bg-black/10 backdrop-blur-xl text-white hover:bg-black/20 hover:border-white/40"
+        }`}
         onDragOver={onDragOver}
         onDragLeave={onDragLeave}
         onDrop={onDrop}
         onClick={() => !isProcessing && fileInputRef.current?.click()}
       >
-        <div className="absolute inset-2 border-2 border-dashed border-secondary pointer-events-none" />
         
         <input 
           type="file" 
@@ -82,36 +83,36 @@ export default function ImageUploader({ onImageReady, currentImageUrl }: ImageUp
 
         {isProcessing ? (
           <div className="flex flex-col items-center gap-4 z-10">
-            <div className="bg-primary text-black p-3 brutal-border animate-pulse">
-              <Loader2 className="w-8 h-8 animate-spin" />
+            <div className="bg-white/10 text-primary p-5 rounded-full border border-white/20 shadow-[0_0_30px_rgba(243,231,0,0.2)] animate-pulse">
+              <Loader2 className="w-10 h-10 animate-spin" />
             </div>
-            <p className="font-sans font-bold text-lg text-primary uppercase">Processing...</p>
+            <p className="font-sans font-bold text-xl text-white uppercase tracking-widest">Processing...</p>
           </div>
         ) : currentImageUrl ? (
           <>
-            <img src={currentImageUrl} alt="Preview" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity hover:mix-blend-normal transition-all" />
-            <div className="relative z-10 bg-secondary text-black p-3 brutal-border brutal-shadow-yellow flex items-center gap-2 hover:-translate-y-1 hover:-translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-none transition-all">
-              <ImageIcon className="w-5 h-5" />
-              <span className="font-sans font-bold uppercase tracking-wider">Change Photo</span>
+            <img src={currentImageUrl} alt="Preview" className="absolute inset-0 w-full h-full object-cover opacity-60 mix-blend-luminosity group-hover:mix-blend-normal transition-all duration-500" />
+            <div className="relative z-10 bg-black/40 backdrop-blur-xl text-white px-6 py-4 rounded-2xl border border-white/20 shadow-xl flex items-center gap-3 group-hover:-translate-y-2 group-hover:bg-black/60 group-hover:border-white/40 group-hover:shadow-[0_10px_30px_rgba(0,0,0,0.5)] transition-all">
+              <ImageIcon className="w-6 h-6 text-primary" />
+              <span className="font-sans font-bold uppercase tracking-widest text-sm text-primary">Change Photo</span>
             </div>
           </>
         ) : (
-          <div className="flex flex-col items-center gap-4 z-10">
-            <div className="bg-primary text-black p-4 brutal-border brutal-shadow-pink hover:-translate-y-1 hover:-translate-x-1 active:translate-y-0 active:translate-x-0 active:shadow-none transition-all">
-              <Upload className="w-8 h-8" />
+          <div className="flex flex-col items-center gap-6 z-10">
+            <div className="bg-white/5 text-primary p-6 rounded-full border border-white/10 shadow-[0_0_30px_rgba(255,255,255,0.05)] group-hover:shadow-[0_0_40px_rgba(243,231,0,0.2)] group-hover:border-primary/40 group-hover:-translate-y-2 group-hover:scale-110 transition-all duration-500">
+              <Upload className="w-10 h-10" />
             </div>
             <div>
-              <h3 className="font-serif text-2xl font-bold mb-1 text-primary">UPLOAD PHOTO</h3>
-              <p className="font-mono text-sm uppercase opacity-90 text-on-surface">JPG, PNG, HEIC (Max 20MB)</p>
+              <h3 className="font-sans text-2xl font-bold mb-2 text-white tracking-widest">UPLOAD PHOTO</h3>
+              <p className="font-mono text-sm uppercase text-white/50 tracking-wider">JPG, PNG, HEIC (Max 20MB)</p>
             </div>
           </div>
         )}
       </div>
 
       {error && (
-        <div className="bg-[#ffb4ab] text-[#690005] p-3 brutal-border font-sans font-bold flex items-start justify-between gap-2 shadow-[4px_4px_0px_0px_#93000a]">
+        <div className="bg-red-500/20 backdrop-blur-md text-red-100 p-4 rounded-xl border border-red-500/30 font-sans font-bold flex items-start justify-between gap-3 shadow-lg">
           <span>{error}</span>
-          <button onClick={() => setError(null)} className="hover:text-black">
+          <button onClick={() => setError(null)} className="hover:text-white transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
